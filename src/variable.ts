@@ -1,16 +1,17 @@
 const VARIABLE_INTERNAL = Symbol("VARIABLE_INTERNAL");
 
-type VariableObject = Readonly<{
-  [VARIABLE_INTERNAL]: { path: string };
-  [k: string]: VariableObject;
-}>;
+interface VariableObject
+  extends Readonly<{
+    [VARIABLE_INTERNAL]: { path: string };
+  }> {}
+
+type Variable<T> = T & VariableObject;
 
 const PROXY_HANDLER: ProxyHandler<VariableObject> = {
   get(target, key) {
     const path = target[VARIABLE_INTERNAL].path;
-    console.log("getting", key, "for", path);
 
-    if (["toString", "toJSON", "valueOf"].includes(key as string)) {
+    if (["toString", "toJSON", "valueOf", Symbol.toPrimitive].includes(key)) {
       return () => `{{${path}}}`;
     }
 
@@ -28,11 +29,11 @@ const PROXY_HANDLER: ProxyHandler<VariableObject> = {
   },
 };
 
-export const createVariable = (args: { path: string }) => {
+export const createVariable = <T = Record<string, any>>(args: {
+  path: string;
+}) => {
   return new Proxy(
     { [VARIABLE_INTERNAL]: { path: args.path } },
     PROXY_HANDLER
-  ) as any;
+  ) as unknown as Variable<T>;
 };
-
-const v = createVariable({ path: "params" });

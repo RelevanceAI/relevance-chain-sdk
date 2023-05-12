@@ -1,9 +1,10 @@
 import { createVariable } from "./Variable";
 import { API } from "./api";
 import {
-  ChainConfig,
   ChainConfigInput,
   ParamSchema,
+  ParamsToTypedObject,
+  Prettify,
   TransformationStep,
 } from "./types";
 import { jsonClone } from "./utils";
@@ -24,7 +25,7 @@ export class Chain {
 
   public defineParams<TParams extends Record<string, ParamSchema>>(
     params: TParams
-  ): Record<keyof TParams, any> {
+  ) {
     if (this.params) {
       throw new Error(
         "Params already defined. If you want to add more params, add them in the initial defineParams call."
@@ -32,13 +33,12 @@ export class Chain {
     }
 
     this.params = params;
-    return createVariable({ path: "params" });
+    return createVariable<Prettify<ParamsToTypedObject<TParams>>>({
+      path: "params",
+    });
   }
 
-  public step(
-    transformation: string,
-    params: Record<string, any>
-  ): Record<string, any> {
+  public step(transformation: string, params: Record<string, any>) {
     let stepName = transformation;
 
     const existingStepsWithSameTransformation = this.steps.filter(

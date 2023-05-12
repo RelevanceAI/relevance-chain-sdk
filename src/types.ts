@@ -1,4 +1,5 @@
 import type { JSONSchema4 } from "json-schema";
+import type { JSONSchema, FromSchema } from "json-schema-to-ts";
 
 export type ChainConfig = {
   _id?: string;
@@ -107,3 +108,7 @@ export type PartiallyOptional<T, K extends keyof T> = Omit<T, K> &
 export type Prettify<TType> = TType extends any[] | Date
   ? TType
   : { [K in keyof TType]: TType[K] };
+
+export type ParamsToTypedObject<T extends Record<string, ParamSchema>> = {
+  [K in keyof T]: T[K] extends JSONSchema ? FromSchema<T[K]> : any;
+};
