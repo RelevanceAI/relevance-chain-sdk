@@ -1,5 +1,6 @@
 import type { JSONSchema4 } from "json-schema";
 import type { JSONSchema, FromSchema } from "json-schema-to-ts";
+import { BuiltinTransformations } from "./generated/transformation-types";
 
 export type ChainConfig = {
   _id?: string;
@@ -112,3 +113,23 @@ export type Prettify<TType> = TType extends any[] | Date
 export type ParamsToTypedObject<T extends Record<string, ParamSchema>> = {
   [K in keyof T]: T[K] extends JSONSchema ? FromSchema<T[K]> : any;
 };
+
+// Interface so users _could_ add their own custom transformations if they want
+export interface CustomTransformations {}
+
+export type TransformationsMap = CustomTransformations & BuiltinTransformations;
+export type TypedTransformationId = keyof TransformationsMap;
+export type AllowedTransformationId = LooseAutoComplete<TypedTransformationId>;
+
+type TransformationDetails<TransformationId extends AllowedTransformationId> =
+  TransformationId extends TypedTransformationId
+    ? TransformationsMap[TransformationId]
+    : { input: Record<string, any>; output: Record<string, any> };
+export type TransformationInput<
+  TransformationId extends AllowedTransformationId
+> = TransformationDetails<TransformationId>["input"];
+export type TransformationOUtput<
+  TransformationId extends AllowedTransformationId
+> = TransformationDetails<TransformationId>["output"];
+
+export type LooseAutoComplete<T extends string> = T | (string & {});

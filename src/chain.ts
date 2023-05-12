@@ -1,11 +1,16 @@
-import { createVariable } from "./Variable";
+import { Variable, createVariable } from "./variable";
 import { API } from "./api";
 import {
+  AllowedTransformationId,
   ChainConfigInput,
+  LooseAutoComplete,
   ParamSchema,
   ParamsToTypedObject,
   Prettify,
+  TransformationInput,
+  TransformationOUtput,
   TransformationStep,
+  TransformationsMap,
 } from "./types";
 import { jsonClone } from "./utils";
 
@@ -38,7 +43,14 @@ export class Chain {
     });
   }
 
-  public step(transformation: string, params: Record<string, any>) {
+  public step<TransformationId extends AllowedTransformationId>(
+    transformation: TransformationId,
+    params: TransformationInput<TransformationId>
+  ): Variable<TransformationOUtput<TransformationId>>;
+  public step(
+    transformation: LooseAutoComplete<keyof TransformationsMap>,
+    params: Record<string, any>
+  ) {
     let stepName = transformation;
 
     const existingStepsWithSameTransformation = this.steps.filter(

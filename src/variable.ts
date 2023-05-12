@@ -1,13 +1,18 @@
 const VARIABLE_INTERNAL = Symbol("VARIABLE_INTERNAL");
 
-interface VariableObject
-  extends Readonly<{
-    [VARIABLE_INTERNAL]: { path: string };
-  }> {}
+interface VariableInternal {
+  readonly [VARIABLE_INTERNAL]: { path: string };
+}
 
-type Variable<T> = T & VariableObject;
+export type Variable<T> = T extends Record<string, any>
+  ? {
+      [K in keyof T]: Variable<T[K]>;
+    }
+  : T extends Array<infer Item>
+  ? Array<Variable<Item>>
+  : T & VariableInternal;
 
-const PROXY_HANDLER: ProxyHandler<VariableObject> = {
+const PROXY_HANDLER: ProxyHandler<VariableInternal> = {
   get(target, key) {
     const path = target[VARIABLE_INTERNAL].path;
 
