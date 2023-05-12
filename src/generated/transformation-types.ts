@@ -1,3 +1,5 @@
+// prettier-ignore
+/** eslint-disable */
 /**
  * 
  * DON'T EDIT THIS FILE MANUALLY.

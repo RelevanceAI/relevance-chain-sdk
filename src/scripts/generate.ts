@@ -55,6 +55,7 @@ ${transformationTypes
 }`.trim();
 
   const outputToWrite = `
+/** eslint-disable */
 /**
  * 
  * DON'T EDIT THIS FILE MANUALLY.
