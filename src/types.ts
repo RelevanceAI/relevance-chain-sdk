@@ -7,7 +7,7 @@ export type ChainConfig = {
   /** Unique ID for studio. This is different from a studio's share ID. */
   studio_id: string;
   /** Project ID */
-  project: string;
+  project?: string;
   /** JSONSchema object that user parameters will be validated against */
   params_schema: {
     properties: Record<string, ParamSchema>;

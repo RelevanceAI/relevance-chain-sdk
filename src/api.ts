@@ -1,16 +1,10 @@
-import invariant from "tiny-invariant";
-import {
-  ChainConfig,
-  ChainConfigInput,
-  ChainState,
-  PartiallyOptional,
-  Prettify,
-} from "./types";
-import { Chain } from "./chain";
+import { ChainConfig, ChainState, PartiallyOptional, Prettify } from "./types";
 const parseToken = (token: string) => {
   const [project, apiKey, region] = token.split(":");
 
-  invariant(project && apiKey && region, "Invalid token");
+  if (!project || !apiKey || !region) {
+    throw new Error("Invalid token");
+  }
 
   return { project, apiKey, region };
 };
@@ -18,10 +12,24 @@ const parseToken = (token: string) => {
 type ParsedToken = ReturnType<typeof parseToken>;
 
 export class API {
-  private parsedToken: ParsedToken;
+  private static parsedToken: ParsedToken;
+  private static token: string = process.env.RELEVANCE_TOKEN || "";
 
-  constructor(private token: string) {
-    this.parsedToken = parseToken(this.token);
+  static setToken(token: string) {
+    this.token = token;
+    this.parsedToken = parseToken(token);
+  }
+
+  constructor(token?: string) {
+    if (token) {
+      API.setToken(token);
+    }
+
+    if (!API.token) {
+      throw new Error(
+        "No token provided. Please provide a token or set the RELEVANCE_TOKEN environment variable."
+      );
+    }
   }
 
   private async request(
@@ -41,13 +49,13 @@ export class API {
         )
       : "";
 
-    const url = `https://api-${this.parsedToken.region}.stack.tryrelevance.com/latest${path}?${queryParams}`;
+    const url = `https://api-${API.parsedToken.region}.stack.tryrelevance.com/latest${path}?${queryParams}`;
 
     const response = await fetch(url, {
       ...options,
       headers: {
         ...options?.headers,
-        Authorization: this.token,
+        Authorization: API.token,
       },
     });
 
@@ -83,6 +91,21 @@ export class API {
         body: JSON.stringify(options),
       }
     );
+    return response;
+  }
+
+  async saveChains(body: {
+    updates: ChainConfig[];
+    version?: string;
+    partial_update?: boolean;
+  }) {
+    const response = await this.request("/studios/bulk_update", {
+      method: "POST",
+      body: JSON.stringify({
+        ...body,
+        partial_update: body.partial_update ?? true,
+      }),
+    });
     return response;
   }
 }

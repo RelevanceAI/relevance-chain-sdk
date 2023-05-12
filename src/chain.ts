@@ -2,6 +2,7 @@ import { Variable, createVariable } from "./variable";
 import { API } from "./api";
 import {
   AllowedTransformationId,
+  ChainConfig,
   ChainConfigInput,
   LooseAutoComplete,
   ParamSchema,
@@ -15,7 +16,11 @@ import {
 import { jsonClone } from "./utils";
 
 export class Chain {
-  private api: API;
+  $RELEVANCE_CHAIN_BRAND = true;
+
+  protected api: API;
+
+  private chainId: string | null = null;
 
   private params: Record<string, ParamSchema> | null = null;
   private steps: TransformationStep[] = [];
@@ -24,8 +29,23 @@ export class Chain {
   private title = "";
   private description = "";
 
-  constructor(token: string) {
+  constructor(token?: string) {
+    token = token || process.env.RELEVANCE_TOKEN;
+
+    if (!token) {
+      throw new Error(
+        "No token provided. Please provide a token or set the RELEVANCE_TOKEN environment variable."
+      );
+    }
+
     this.api = new API(token);
+  }
+
+  public setTitle(title: string) {
+    this.title = title;
+  }
+  public setDescription(description: string) {
+    this.description = description;
   }
 
   public defineParams<TParams extends Record<string, ParamSchema>>(
@@ -75,9 +95,10 @@ export class Chain {
     this.output = output;
   }
 
-  public toJSON(): ChainConfigInput {
+  public toJSON(): ChainConfig {
     // Need to do this to trigger the `toJSON`s of the variables
     return jsonClone({
+      studio_id: this.chainId || "LOCAL_DEV_CHAIN",
       title: this.title,
       description: this.description,
       params_schema: {
@@ -90,16 +111,20 @@ export class Chain {
     });
   }
 
+  public setChainId(chainId: string) {
+    this.chainId = chainId;
+  }
+  public getChainId() {
+    return this.chainId;
+  }
+
   public async run(params: Record<string, any>) {
-    const chainId = "LOCAL_DEBUG_CHAIN";
+    const config = this.toJSON();
     const response = await this.api.runChain({
-      studio_id: chainId,
+      studio_id: config.studio_id,
       params,
       return_state: true,
-      studio_override: {
-        studio_id: chainId,
-        ...this.toJSON(),
-      },
+      studio_override: config,
     });
     return response;
   }

@@ -1,4 +1,3 @@
-// prettier-ignore
 /** eslint-disable */
 /**
  * 
