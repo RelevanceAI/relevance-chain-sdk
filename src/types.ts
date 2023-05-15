@@ -136,7 +136,7 @@ export type TransformationOUtput<
 export type LooseAutoComplete<T extends string> = T | (string & {});
 
 // Using this instead of `Chain<any,any>` for the types because TypeScript doesn't like it
-export type InferChainInput<Chain extends { run: (...args: any[]) => any }> =
+export type InferChainInput<Chain extends { run: (params: any) => any }> =
   Parameters<Chain["run"]>[0];
-export type InferChainOutput<Chain extends { run: (...args: any[]) => any }> =
+export type InferChainOutput<Chain extends { run: (params: any) => any }> =
   Awaited<ReturnType<Chain["run"]>>["output"];
