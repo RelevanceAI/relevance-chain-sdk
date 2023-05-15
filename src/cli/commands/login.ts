@@ -1,7 +1,7 @@
 import { Command } from "commander";
 import { getAuthDetailsFromEnv } from "../../env";
 import { confirm, text, isCancel } from "@clack/prompts";
-import { writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 
 export const login = new Command("login")
   .description("Log in to Relevance AI and get started creating AI chains")
@@ -42,6 +42,7 @@ export const login = new Command("login")
       `RELEVANCE_API_KEY=${apiKey.trim()}`,
     ].join("\n");
 
+    await mkdir("./chains", { recursive: true });
     await writeFile("./chains/.relevance", output, "utf-8");
     await writeFile("./chains/.gitignore", ".relevance", "utf-8");
   });
