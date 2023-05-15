@@ -1,6 +1,6 @@
 {
   "name": "@relevanceai/chain",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "private": false,
   "description": "The managed, developer-first SDK for building LLM chains.",
   "main": "dist/index.js",
@@ -23,9 +23,9 @@
     "relevance": "dist/bin.js"
   },
   "scripts": {
-    "prebuild": "pnpm run generate",
+    "prebuild": "npm run generate",
     "build": "tsup",
-    "build:watch": "pnpm run prebuild && tsup --watch",
+    "build:watch": "npm run prebuild && tsup --watch",
     "cli:dev": "tsx src/bin",
     "type-check": "tsc src/index.ts --noEmit",
     "generate": "tsx src/scripts/generate.ts",
