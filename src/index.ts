@@ -5,3 +5,4 @@ export {
   TransformationsMap,
   CustomTransformationsMap as CustomTransformations,
 } from "./types";
+export * from "./client";

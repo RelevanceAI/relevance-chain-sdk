@@ -1,6 +1,6 @@
 {
   "name": "@relevanceai/chain",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": false,
   "description": "",
   "main": "dist/index.js",
@@ -17,13 +17,6 @@
       "node": "./dist/index.js",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    },
-    "./client": {
-      "import": "./dist/client.mjs",
-      "require": "./dist/client.js",
-      "node": "./dist/client.js",
-      "types": "./dist/client.d.ts",
-      "default": "./dist/client.js"
     }
   },
   "bin": {
