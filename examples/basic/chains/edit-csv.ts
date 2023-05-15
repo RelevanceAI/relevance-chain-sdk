@@ -4,6 +4,10 @@ const chain = defineChain({
   title: "Edit CSV",
   description:
     "Upload a csv, and ask for the llm to edit it. For example, you could ask it 'Add a category column based on the description column.'",
+
+  // Publicly Triggerable is false so this chain can only be run with an API key
+  publiclyTriggerable: false,
+
   params: {
     question: {
       type: "string",

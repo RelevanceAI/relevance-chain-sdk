@@ -5,8 +5,13 @@ import {
 } from "../../../src/index";
 
 const chain = defineChain({
-  title: "Ask questions about a short PDF 2",
+  title: "Ask questions about a short PDF",
+
+  /**
+   * Publicly triggerable is set to true, so this chain can be run without an API key
+   */
   publiclyTriggerable: true,
+
   params: {
     pdf_url: {
       type: "string",
