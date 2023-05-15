@@ -1,5 +1,5 @@
 import { UnwrapVariable, Variable, createVariable } from "./variable";
-import { API } from "./api";
+import { API, APIAuthDetails } from "./api";
 import {
   AllowedTransformationId,
   ChainConfig,
@@ -33,16 +33,8 @@ export class Chain<
 
   private publiclyTriggerable = false;
 
-  constructor(token?: string) {
-    token = token || process.env.RELEVANCE_TOKEN;
-
-    if (!token) {
-      throw new Error(
-        "No token provided. Please provide a token or set the RELEVANCE_TOKEN environment variable."
-      );
-    }
-
-    this.api = new API(token);
+  constructor(authDetails?: APIAuthDetails) {
+    this.api = new API(authDetails);
   }
 
   public setTitle(title: string) {

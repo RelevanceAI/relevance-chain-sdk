@@ -360,6 +360,16 @@ export interface AnalyseImageOutput {
   output: string;
 }
 
+export interface TruncateTextInput {
+  text: string | any[];
+  num_tokens: number;
+}
+
+export interface TruncateTextOutput {
+  chunks: string | any[];
+  [k: string]: any | undefined;
+}
+
 export type BuiltinTransformations = {
   prompt_completion: { input: PromptCompletionInput, output: PromptCompletionOutput }
   api_call: { input: ApiCallInput, output: ApiCallOutput }
@@ -384,4 +394,5 @@ export type BuiltinTransformations = {
   combine_array: { input: CombineArrayInput, output: CombineArrayOutput }
   upload_file_s3: { input: UploadFileS3Input, output: UploadFileS3Output }
   analyse_image: { input: AnalyseImageInput, output: AnalyseImageOutput }
+  truncate_text: { input: TruncateTextInput, output: TruncateTextOutput }
 }

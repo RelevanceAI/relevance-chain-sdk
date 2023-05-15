@@ -1,3 +1,4 @@
+import { getAuthDetailsFromEnv, loadEnv } from "./env";
 import {
   ChainConfig,
   Prettify,
@@ -5,37 +6,35 @@ import {
   RunChainOutput,
 } from "./types";
 
-const parseToken = (token: string) => {
-  const [project, apiKey, region] = token.split(":");
-
-  if (!project || !apiKey || !region) {
-    throw new Error("Invalid token");
-  }
-
-  return { project, apiKey, region };
+export type APIAuthDetails = {
+  project: string;
+  region: string;
+  apiKey: string;
 };
 
-type ParsedToken = ReturnType<typeof parseToken>;
-
 export class API {
-  static parsedToken: ParsedToken;
-  private static token: string = process.env.RELEVANCE_TOKEN || "";
+  private authDetails: APIAuthDetails;
 
-  static setToken(token: string) {
-    this.token = token;
-    this.parsedToken = parseToken(token);
-  }
+  constructor(authDetails?: APIAuthDetails) {
+    loadEnv();
 
-  constructor(token?: string) {
-    if (token) {
-      API.setToken(token);
-    }
+    const authDetailsToUse = authDetails ?? getAuthDetailsFromEnv();
 
-    if (!API.token) {
+    if (
+      !authDetailsToUse.project ||
+      !authDetailsToUse.region ||
+      !authDetailsToUse.apiKey
+    ) {
       throw new Error(
-        "No token provided. Please provide a token or set the RELEVANCE_TOKEN environment variable."
+        "Missing auth details. Please provide a project ID, region, and API key."
       );
     }
+
+    this.authDetails = authDetailsToUse;
+  }
+
+  private get token() {
+    return `${this.authDetails.project}:${this.authDetails.apiKey}:${this.authDetails.region}`;
   }
 
   private async request(
@@ -55,13 +54,13 @@ export class API {
         )
       : "";
 
-    const url = `https://api-${API.parsedToken.region}.stack.tryrelevance.com/latest${path}?${queryParams}`;
+    const url = `https://api-${this.authDetails.region}.stack.tryrelevance.com/latest${path}?${queryParams}`;
 
     const response = await fetch(url, {
       ...options,
       headers: {
         ...options?.headers,
-        Authorization: API.token,
+        Authorization: this.token,
       },
     });
 
@@ -127,7 +126,7 @@ export class API {
           {
             filter_type: "exact_match",
             field: "project",
-            condition_value: API.parsedToken.project,
+            condition_value: this.authDetails.project,
           },
         ],
       },
