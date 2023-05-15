@@ -14,14 +14,17 @@ import {
 } from "./types";
 import { jsonClone } from "./utils";
 
-export class Chain<Output extends Record<string, any>> {
+export class Chain<
+  ParamsDefinition extends Record<string, ParamSchema>,
+  Output extends Record<string, any>
+> {
   $RELEVANCE_CHAIN_BRAND = true;
 
   protected api: API;
 
   private chainId: string | null = null;
 
-  private params: Record<string, ParamSchema> | null = null;
+  private params: ParamsDefinition | null = null;
   private steps: TransformationStep[] = [];
   private output: Output | null = null;
 
@@ -47,9 +50,7 @@ export class Chain<Output extends Record<string, any>> {
     this.description = description;
   }
 
-  public defineParams<TParams extends Record<string, ParamSchema>>(
-    params: TParams
-  ) {
+  public defineParams(params: ParamsDefinition) {
     if (this.params) {
       throw new Error(
         "Params already defined. If you want to add more params, add them in the initial defineParams call."
@@ -57,7 +58,7 @@ export class Chain<Output extends Record<string, any>> {
     }
 
     this.params = params;
-    return createVariable<Prettify<ParamsToTypedObject<TParams>>>({
+    return createVariable<Prettify<ParamsToTypedObject<ParamsDefinition>>>({
       path: "params",
     });
   }
@@ -122,7 +123,7 @@ export class Chain<Output extends Record<string, any>> {
     return this.chainId;
   }
 
-  public async run(params: Record<string, any>) {
+  public async run(params: ParamsDefinition) {
     const config = this.toJSON();
     const response = await this.api.runChain<UnwrapVariable<Output>>({
       studio_id: config.studio_id,
@@ -145,7 +146,7 @@ export class Chain<Output extends Record<string, any>> {
       step: (typeof Chain)["prototype"]["step"];
     }): ChainOutput | void | null;
   }) => {
-    const chain = new Chain<ChainOutput>();
+    const chain = new Chain<ChainParamsDefinition, ChainOutput>();
     const params = chain.defineParams(
       input.params || ({} as ChainParamsDefinition)
     );
