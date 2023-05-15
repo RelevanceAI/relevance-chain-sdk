@@ -1,4 +1,10 @@
-import { ChainConfig, ChainState, PartiallyOptional, Prettify } from "./types";
+import {
+  ChainConfig,
+  Prettify,
+  RunChainOptions,
+  RunChainOutput,
+} from "./types";
+
 const parseToken = (token: string) => {
   const [project, apiKey, region] = token.split(":");
 
@@ -12,7 +18,7 @@ const parseToken = (token: string) => {
 type ParsedToken = ReturnType<typeof parseToken>;
 
 export class API {
-  private static parsedToken: ParsedToken;
+  static parsedToken: ParsedToken;
   private static token: string = process.env.RELEVANCE_TOKEN || "";
 
   static setToken(token: string) {
@@ -108,25 +114,46 @@ export class API {
     });
     return response;
   }
-}
 
-type RunChainOptions<ReturnState extends boolean = boolean> = {
-  return_state?: ReturnState;
-  version?: string;
-  params?: Record<string, any>;
-  studio_id: string;
-  studio_override?: PartiallyOptional<ChainConfig, "project">;
-  state_override?: ChainState;
-};
-type RunChainOutput<
-  ReturnState extends boolean = boolean,
-  Output extends Record<string, any> = Record<string, any>
-> = {
-  status: "complete" | "inprogress" | "failed" | "cancelled";
-  output: Output;
-  executionTime?: number;
-  errors: { raw: string; body: string; stepName?: string }[];
-} & (ReturnState extends true ? { state: ChainState } : { state?: undefined });
+  async getChainsByIds(ids: string[]): Promise<ChainConfig[]> {
+    const response = await this.request("/studios/list", {
+      query: {
+        filters: [
+          {
+            filter_type: "exact_match",
+            field: "studio_id",
+            condition_value: ids,
+          },
+          {
+            filter_type: "exact_match",
+            field: "project",
+            condition_value: API.parsedToken.project,
+          },
+        ],
+      },
+    });
+
+    return response.results;
+  }
+
+  async shareChain(
+    chainId: string
+  ): Promise<{ share_link: string; share_id: string; region: string }> {
+    const response = await this.request(`/studios/${chainId}/get_share_link`, {
+      method: "POST",
+    });
+
+    return response;
+  }
+
+  async unshareChain(chainId: string, shareId: string): Promise<void> {
+    await this.request(`/studios/${chainId}/delete_share_link`, {
+      body: JSON.stringify({
+        share_id: shareId,
+      }),
+    });
+  }
+}
 
 export class APIError extends Error {
   constructor(message: string) {

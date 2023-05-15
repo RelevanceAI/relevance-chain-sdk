@@ -115,10 +115,31 @@ export type ParamsToTypedObject<T extends Record<string, ParamSchema>> = {
   [K in keyof T]: T[K] extends JSONSchema ? FromSchema<T[K]> : any;
 };
 
-// Interface so users _could_ add their own custom transformations if they want
-export interface CustomTransformations {}
+/**
+ * Add types for custom transformations.
+ *
+ * @example
+ * ```ts
+ * declare module "@relevanceai/chain" {
+ *   interface CustomTransformationsMap {
+ *     "my-custom-transformation": {
+ *       input: {
+ *         myCustomParam: string;
+ *       };
+ *       output: {
+ *         myCustomOutput: string;
+ *       };
+ *     }
+ *   }
+ * }
+ * ```
+ */
+export interface CustomTransformationsMap {
+  // Interface so users _could_ add their own custom transformations if they want
+}
 
-export type TransformationsMap = CustomTransformations & BuiltinTransformations;
+export type TransformationsMap = CustomTransformationsMap &
+  BuiltinTransformations;
 export type TypedTransformationId = keyof TransformationsMap;
 export type AllowedTransformationId = LooseAutoComplete<TypedTransformationId>;
 
@@ -136,7 +157,28 @@ export type TransformationOUtput<
 export type LooseAutoComplete<T extends string> = T | (string & {});
 
 // Using this instead of `Chain<any,any>` for the types because TypeScript doesn't like it
-export type InferChainInput<Chain extends { run: (params: any) => any }> =
-  Parameters<Chain["run"]>[0];
-export type InferChainOutput<Chain extends { run: (params: any) => any }> =
-  Awaited<ReturnType<Chain["run"]>>["output"];
+export type ChainRunnable = { run: (params: any) => Record<string, any> };
+export type InferChainInput<Chain extends ChainRunnable> = Parameters<
+  Chain["run"]
+>[0];
+export type InferChainOutput<Chain extends ChainRunnable> = Awaited<
+  ReturnType<Chain["run"]>
+>["output"];
+
+export type RunChainOptions<ReturnState extends boolean = boolean> = {
+  return_state?: ReturnState;
+  version?: string;
+  params?: Record<string, any>;
+  studio_id: string;
+  studio_override?: PartiallyOptional<ChainConfig, "project">;
+  state_override?: ChainState;
+};
+export type RunChainOutput<
+  ReturnState extends boolean = boolean,
+  Output extends Record<string, any> = Record<string, any>
+> = {
+  status: "complete" | "inprogress" | "failed" | "cancelled";
+  output: Output;
+  executionTime?: number;
+  errors: { raw: string; body: string; stepName?: string }[];
+} & (ReturnState extends true ? { state: ChainState } : { state?: undefined });

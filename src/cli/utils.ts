@@ -12,6 +12,6 @@ export const chainsFolderExists = async () => {
   return existsSync(CHAINS_FOLDER_PATH_ABSOLUTE);
 };
 
-export const isChain = (chain: any): chain is Chain =>
+export const isChain = (chain: any): chain is Chain<any, any> =>
   chain instanceof Chain ||
   ("$RELEVANCE_CHAIN_BRAND" in chain && chain.$RELEVANCE_CHAIN_BRAND === true);

@@ -7,6 +7,9 @@ dependencies:
   json-schema-to-ts:
     specifier: ^2.8.2
     version: 2.8.2
+  kleur:
+    specifier: ^4.1.5
+    version: 4.1.5
   ora:
     specifier: ^6.3.0
     version: 6.3.0
@@ -930,6 +933,11 @@ packages:
 
   /json-schema@0.4.0:
     resolution: {integrity: sha512-es94M3nTIfsEPisRafak+HDLfHXnKBhV3vU5eqPcS3flIWqcxJWgXHXiey3YrpaNsanY5ei1VoYEbOzijuq9BA==}
+    dev: false
+
+  /kleur@4.1.5:
+    resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
+    engines: {node: '>=6'}
     dev: false
 
   /lilconfig@2.1.0:

@@ -27,9 +27,11 @@ export interface ApiCallInput {
   headers?: {
     [k: string]: any | undefined;
   };
-  body?: {
-    [k: string]: any | undefined;
-  };
+  body?:
+    | string
+    | {
+        [k: string]: any | undefined;
+      };
   response_type?: "string" | "json" | "arrayBuffer" | "blob";
 }
 

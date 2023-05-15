@@ -31,6 +31,8 @@ export class Chain<
   private title = "";
   private description = "";
 
+  private publiclyTriggerable = false;
+
   constructor(token?: string) {
     token = token || process.env.RELEVANCE_TOKEN;
 
@@ -48,6 +50,9 @@ export class Chain<
   }
   public setDescription(description: string) {
     this.description = description;
+  }
+  public setPubliclyTriggerable(value: boolean) {
+    this.publiclyTriggerable = value;
   }
 
   public defineParams(params: ParamsDefinition) {
@@ -113,6 +118,7 @@ export class Chain<
         steps: this.steps,
         output: this.output,
       },
+      publicly_triggerable: this.publiclyTriggerable,
     });
   }
 
@@ -141,6 +147,9 @@ export class Chain<
   >(input: {
     title?: string;
     description?: string;
+
+    publiclyTriggerable?: boolean;
+
     params?: ChainParamsDefinition;
     setup(context: {
       params: Variable<Prettify<ParamsToTypedObject<ChainParamsDefinition>>>;
@@ -157,6 +166,7 @@ export class Chain<
     if (input.description) {
       chain.setDescription(input.description);
     }
+    chain.setPubliclyTriggerable(input.publiclyTriggerable ?? false);
     const output = input.setup({
       params,
       step: chain.step.bind(chain),

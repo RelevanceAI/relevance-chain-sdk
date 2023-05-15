@@ -1,2 +1,7 @@
 export * from "./chain";
-export * from "./chain-builder";
+export {
+  InferChainInput,
+  InferChainOutput,
+  TransformationsMap,
+  CustomTransformationsMap as CustomTransformations,
+} from "./types";

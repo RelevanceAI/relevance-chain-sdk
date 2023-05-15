@@ -6,6 +6,7 @@ import { CHAINS_FOLDER_PATH_ABSOLUTE, isChain } from "./utils";
 import { CHAINS_FOLDER_PATH_RELATIVE } from "./utils";
 import { API } from "../api";
 import { ChainConfig } from "../types";
+import kleur from "kleur";
 
 const CHAIN_FILE_EXTENSIONS = [".ts", ".mts", ".cts", ".js", ".mjs", ".cjs"];
 
@@ -91,7 +92,7 @@ ${errorResults.join("\n")}
 `);
     }
 
-    const deploy = async (version?: string) => {
+    const deploy = async (version: string) => {
       const versionToUse = version || "" + Math.random();
 
       const api = new API(process.env.RELEVANCE_TOKEN!);
@@ -101,11 +102,79 @@ ${errorResults.join("\n")}
         }),
         version: versionToUse,
       });
+
+      const chains = await api.getChainsByIds(
+        successResults.map((result) => result.chainConfig.studio_id)
+      );
+      const chainsById = Object.fromEntries(
+        chains.map((c) => [c.studio_id, c])
+      );
+
+      const chainsWithProjectAndRegion = (
+        await Promise.all(
+          successResults.map(async (result) => {
+            const savedChain = chainsById[result.chainConfig.studio_id];
+            if (!savedChain) return;
+            const isCurrentlyPubliclyTriggerable =
+              !!savedChain.publicly_triggerable;
+            const shouldBePubliclyTriggerable =
+              !!result.chainConfig.publicly_triggerable;
+
+            // Need to update if chain is publicly triggerable
+            if (
+              isCurrentlyPubliclyTriggerable !== shouldBePubliclyTriggerable
+            ) {
+              // chain needs to be shared
+              if (shouldBePubliclyTriggerable) {
+                await api.shareChain(savedChain.studio_id);
+              }
+              // chain needs to be unshared
+              else if (savedChain.share_id) {
+                await api.unshareChain(
+                  savedChain.studio_id,
+                  savedChain.share_id
+                );
+              }
+            }
+
+            return {
+              chainConfig: {
+                ...result.chainConfig,
+                project: savedChain.project!,
+                region: API.parsedToken.region,
+              },
+              path: result.path,
+            };
+          })
+        )
+      ).flatMap((v) => (v ? v : []));
+
+      return chainsWithProjectAndRegion;
     };
 
-    await oraPromise(deploy("latest"), {
-      text: "Deploying your chains to production",
+    const chainsWithProjectAndRegion = await oraPromise(deploy("latest"), {
+      text: "Deploying your chains",
       successText: "Deployed your chains to production 🚀",
+    });
+
+    chainsWithProjectAndRegion.forEach(({ chainConfig, path }) => {
+      const lines = [
+        `${kleur.green(chainConfig.studio_id)} ${kleur.dim(
+          `(${path.replace(CHAINS_FOLDER_PATH_ABSOLUTE, "chains")})`
+        )}`,
+        `  Edit notebook: ${kleur.underline(
+          `https://chain.relevanceai.com/notebook/${chainConfig.region}/${chainConfig.project}/${chainConfig.studio_id}/chain`
+        )}`,
+        chainConfig.publicly_triggerable &&
+          `  Public run id: ${kleur.underline(
+            [
+              chainConfig.region,
+              chainConfig.project,
+              chainConfig.studio_id,
+            ].join(":")
+          )}`,
+      ].filter(Boolean);
+      console.log("\n" + lines.join("\n"));
     });
 
     // await oraPromise(deploy(), {
