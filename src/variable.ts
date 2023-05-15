@@ -12,6 +12,14 @@ export type Variable<T> = T extends Record<string, any>
   ? Array<Variable<Item>>
   : T & VariableInternal;
 
+export type UnwrapVariable<T> = T extends Variable<infer U>
+  ? U
+  : T extends Array<Variable<infer U>>
+  ? U[]
+  : T extends Record<string, any>
+  ? { [K in keyof T]: UnwrapVariable<T[K]> }
+  : T;
+
 const PROXY_HANDLER: ProxyHandler<VariableInternal> = {
   get(target, key) {
     const path = target[VARIABLE_INTERNAL].path;

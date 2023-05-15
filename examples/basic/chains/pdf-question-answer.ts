@@ -17,10 +17,6 @@ const { text } = chain.step("pdf_to_text", {
   pdf_url,
 });
 
-const anotherpdftotext = chain.step("pdf_to_text", {
-  pdf_url,
-});
-
 const { chunks } = chain.step("split_text", {
   method: "tokens",
   num_tokens: 500,

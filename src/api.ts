@@ -77,12 +77,12 @@ export class API {
     return response.studio;
   }
 
-  async runChain(
+  async runChain<Output extends Record<string, any>>(
     options: RunChainOptions<true>
-  ): Promise<Prettify<RunChainOutput<true>>>;
-  async runChain(
+  ): Promise<Prettify<RunChainOutput<true, Output>>>;
+  async runChain<Output extends Record<string, any>>(
     options: RunChainOptions<false>
-  ): Promise<Prettify<RunChainOutput<false>>>;
+  ): Promise<Prettify<RunChainOutput<false, Output>>>;
   async runChain(options: RunChainOptions): Promise<RunChainOutput> {
     const response = await this.request(
       `/studios/${options.studio_id}/trigger`,
@@ -118,9 +118,12 @@ type RunChainOptions<ReturnState extends boolean = boolean> = {
   studio_override?: PartiallyOptional<ChainConfig, "project">;
   state_override?: ChainState;
 };
-type RunChainOutput<ReturnState extends boolean = boolean> = {
+type RunChainOutput<
+  ReturnState extends boolean = boolean,
+  Output extends Record<string, any> = Record<string, any>
+> = {
   status: "complete" | "inprogress" | "failed" | "cancelled";
-  output: Record<string, any>;
+  output: Output;
   executionTime?: number;
   errors: { raw: string; body: string; stepName?: string }[];
 } & (ReturnState extends true ? { state: ChainState } : { state?: undefined });

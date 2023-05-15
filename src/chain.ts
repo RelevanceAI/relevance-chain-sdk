@@ -1,9 +1,8 @@
-import { Variable, createVariable } from "./variable";
+import { UnwrapVariable, Variable, createVariable } from "./variable";
 import { API } from "./api";
 import {
   AllowedTransformationId,
   ChainConfig,
-  ChainConfigInput,
   LooseAutoComplete,
   ParamSchema,
   ParamsToTypedObject,
@@ -15,7 +14,7 @@ import {
 } from "./types";
 import { jsonClone } from "./utils";
 
-export class Chain {
+export class Chain<Output extends Record<string, any>> {
   $RELEVANCE_CHAIN_BRAND = true;
 
   protected api: API;
@@ -24,7 +23,7 @@ export class Chain {
 
   private params: Record<string, ParamSchema> | null = null;
   private steps: TransformationStep[] = [];
-  private output: Record<string, any> | null = null;
+  private output: Output | null = null;
 
   private title = "";
   private description = "";
@@ -91,7 +90,12 @@ export class Chain {
     return createVariable({ path: `steps.${stepName}.output` });
   }
 
-  public defineOutput(output: Record<string, any>) {
+  public defineOutput(output: Output) {
+    if (this.output) {
+      throw new Error(
+        "Output already defined. If you want to add more output, add them in the initial defineOutput call."
+      );
+    }
     this.output = output;
   }
 
@@ -120,7 +124,7 @@ export class Chain {
 
   public async run(params: Record<string, any>) {
     const config = this.toJSON();
-    const response = await this.api.runChain({
+    const response = await this.api.runChain<UnwrapVariable<Output>>({
       studio_id: config.studio_id,
       params,
       return_state: true,
@@ -128,4 +132,38 @@ export class Chain {
     });
     return response;
   }
+
+  static define = <
+    ChainParamsDefinition extends Record<string, ParamSchema>,
+    ChainOutput extends Record<string, any>
+  >(input: {
+    title?: string;
+    description?: string;
+    params?: ChainParamsDefinition;
+    setup(context: {
+      params: Variable<Prettify<ParamsToTypedObject<ChainParamsDefinition>>>;
+      step: (typeof Chain)["prototype"]["step"];
+    }): ChainOutput | void | null;
+  }) => {
+    const chain = new Chain<ChainOutput>();
+    const params = chain.defineParams(
+      input.params || ({} as ChainParamsDefinition)
+    );
+    if (input.title) {
+      chain.setTitle(input.title);
+    }
+    if (input.description) {
+      chain.setDescription(input.description);
+    }
+    const output = input.setup({
+      params,
+      step: chain.step.bind(chain),
+    });
+    if (output) {
+      chain.defineOutput(output);
+    }
+    return chain;
+  };
 }
+
+export const defineChain: (typeof Chain)["define"] = Chain.define;
