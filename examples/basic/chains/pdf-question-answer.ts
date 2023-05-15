@@ -1,8 +1,4 @@
-import {
-  defineChain,
-  InferChainInput,
-  InferChainOutput,
-} from "../../../src/index";
+import { defineChain } from "../../../src/index";
 
 const chain = defineChain({
   title: "Ask questions about a short PDF",
@@ -55,6 +51,3 @@ Answer:`,
 });
 
 export default chain;
-
-type input = InferChainInput<typeof chain>;
-type output = InferChainOutput<typeof chain>;
