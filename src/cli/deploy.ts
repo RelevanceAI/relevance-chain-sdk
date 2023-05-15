@@ -10,11 +10,11 @@ import { ChainConfig } from "../types";
 const CHAIN_FILE_EXTENSIONS = [".ts", ".mts", ".cts", ".js", ".mjs", ".cjs"];
 
 export const deploy = new Command("deploy")
-  .option(
-    "--prod",
-    "If provided, chains will be deployed to production. Otherwise you will get a preview deployment",
-    false
-  )
+  // .option(
+  //   "--prod",
+  //   "If provided, chains will be deployed to production. Otherwise you will get a preview deployment",
+  //   false
+  // )
   .action(async ({ prod }, command: Command) => {
     const { oraPromise } = await import("ora");
 
