@@ -16,7 +16,7 @@ import { jsonClone } from "./utils";
 
 export class Chain<
   ParamsDefinition extends Record<string, ParamSchema>,
-  Output extends Record<string, any>
+  OutputDefinition extends Record<string, any>
 > {
   $RELEVANCE_CHAIN_BRAND = true;
 
@@ -26,7 +26,7 @@ export class Chain<
 
   private params: ParamsDefinition | null = null;
   private steps: TransformationStep[] = [];
-  private output: Output | null = null;
+  private output: OutputDefinition | null = null;
 
   private title = "";
   private description = "";
@@ -91,7 +91,7 @@ export class Chain<
     return createVariable({ path: `steps.${stepName}.output` });
   }
 
-  public defineOutput(output: Output) {
+  public defineOutput(output: OutputDefinition) {
     if (this.output) {
       throw new Error(
         "Output already defined. If you want to add more output, add them in the initial defineOutput call."
@@ -123,9 +123,10 @@ export class Chain<
     return this.chainId;
   }
 
-  public async run(params: ParamsDefinition) {
+  public async run(params: ParamsToTypedObject<ParamsDefinition>) {
+    type Output = UnwrapVariable<OutputDefinition>;
     const config = this.toJSON();
-    const response = await this.api.runChain<UnwrapVariable<Output>>({
+    const response = await this.api.runChain<Output>({
       studio_id: config.studio_id,
       params,
       return_state: true,
@@ -136,7 +137,7 @@ export class Chain<
 
   static define = <
     ChainParamsDefinition extends Record<string, ParamSchema>,
-    ChainOutput extends Record<string, any>
+    ChainOutputDefinition extends Record<string, any>
   >(input: {
     title?: string;
     description?: string;
@@ -144,9 +145,9 @@ export class Chain<
     setup(context: {
       params: Variable<Prettify<ParamsToTypedObject<ChainParamsDefinition>>>;
       step: (typeof Chain)["prototype"]["step"];
-    }): ChainOutput | void | null;
+    }): ChainOutputDefinition | void | null;
   }) => {
-    const chain = new Chain<ChainParamsDefinition, ChainOutput>();
+    const chain = new Chain<ChainParamsDefinition, ChainOutputDefinition>();
     const params = chain.defineParams(
       input.params || ({} as ChainParamsDefinition)
     );

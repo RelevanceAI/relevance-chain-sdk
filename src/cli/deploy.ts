@@ -103,15 +103,20 @@ ${errorResults.join("\n")}
       });
     };
 
-    await oraPromise(deploy(), {
-      text: "Deploying your chains",
-      successText: "Deployed your chains",
+    await oraPromise(deploy("latest"), {
+      text: "Deploying your chains to production",
+      successText: "Deployed your chains to production 🚀",
     });
 
-    if (prod) {
-      await oraPromise(deploy("latest"), {
-        text: "Deploying your chains to production",
-        successText: "Deployed your chains to production 🚀",
-      });
-    }
+    // await oraPromise(deploy(), {
+    //   text: "Deploying your chains",
+    //   successText: "Deployed your chains",
+    // });
+
+    // if (prod) {
+    //   await oraPromise(deploy("latest"), {
+    //     text: "Deploying your chains to production",
+    //     successText: "Deployed your chains to production 🚀",
+    //   });
+    // }
   });

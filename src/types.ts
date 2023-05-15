@@ -1,6 +1,7 @@
 import type { JSONSchema4 } from "json-schema";
 import type { JSONSchema, FromSchema } from "json-schema-to-ts";
 import { BuiltinTransformations } from "./generated/transformation-types";
+import type { Chain } from "./chain";
 
 export type ChainConfig = {
   _id?: string;
@@ -133,3 +134,9 @@ export type TransformationOUtput<
 > = TransformationDetails<TransformationId>["output"];
 
 export type LooseAutoComplete<T extends string> = T | (string & {});
+
+// Using this instead of `Chain<any,any>` for the types because TypeScript doesn't like it
+export type InferChainInput<Chain extends { run: (...args: any[]) => any }> =
+  Parameters<Chain["run"]>[0];
+export type InferChainOutput<Chain extends { run: (...args: any[]) => any }> =
+  Awaited<ReturnType<Chain["run"]>>["output"];
