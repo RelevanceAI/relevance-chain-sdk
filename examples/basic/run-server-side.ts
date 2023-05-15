@@ -7,7 +7,7 @@ const main = async () => {
     question: "How many shares are outstanding?",
   });
 
-  console.log("Running server-side version", result.output);
+  console.log("Ran server-side version", result.output);
 };
 
 main();
