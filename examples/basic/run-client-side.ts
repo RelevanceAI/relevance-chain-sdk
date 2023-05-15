@@ -1,5 +1,5 @@
 import { Client } from "../..";
-// import the chain as a type so we avoid the bundle size increase
+// import the chain as a type to avoiding including it in the client-side bundle
 import type pdfQA from "./chains/pdf-question-answer";
 
 const main = async () => {
