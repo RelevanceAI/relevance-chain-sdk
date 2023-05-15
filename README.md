@@ -10,4 +10,4 @@ npm i -g @relevanceai/chain
 
 ## Documentation
 
-See our developer documentation [here](https://relevanceai.mintlify.app/introduction).
+See our developer documentation [here](https://documentation.relevanceai.com).
