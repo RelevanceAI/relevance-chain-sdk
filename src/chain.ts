@@ -55,7 +55,9 @@ export class Chain<
     this.publiclyTriggerable = value;
   }
 
-  public defineParams(params: ParamsDefinition) {
+  public defineParams<InnerParamsDefinition extends ParamsDefinition>(
+    params: InnerParamsDefinition
+  ) {
     if (this.params) {
       throw new Error(
         "Params already defined. If you want to add more params, add them in the initial defineParams call."
@@ -63,9 +65,11 @@ export class Chain<
     }
 
     this.params = params;
-    return createVariable<Prettify<ParamsToTypedObject<ParamsDefinition>>>({
-      path: "params",
-    });
+    return createVariable<Prettify<ParamsToTypedObject<InnerParamsDefinition>>>(
+      {
+        path: "params",
+      }
+    );
   }
 
   public step<TransformationId extends AllowedTransformationId>(
