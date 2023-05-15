@@ -2,7 +2,14 @@
   "name": "basic-chains-example",
   "version": "1.0.0",
   "description": "",
+  "scripts": {
+    "start": "tsx run-server-side.ts && tsx run-client-side.ts",
+    "dev": "npm run start"
+  },
   "keywords": [],
   "author": "Soorria Saruva <soorria.ss@gmail.com> (http://soorria.com/)",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "tsx": "^3.12.7"
+  }
 }

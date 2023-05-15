@@ -8,6 +8,9 @@ export const loadEnv = (reload?: boolean) => {
   }
 
   dotenv.config();
+  dotenv.config({
+    path: "./chains/.relevance",
+  });
   envLoaded = true;
 };
 

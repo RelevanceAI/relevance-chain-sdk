@@ -1,0 +1,5 @@
+# Ignore lock files in examples
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+bun.lockb

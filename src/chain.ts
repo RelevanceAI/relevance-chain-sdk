@@ -64,6 +64,17 @@ export class Chain<
     );
   }
 
+  /**
+   * Add a step to your chain. You can call this multiple times to add
+   * multiple steps to your chain.
+   *
+   * @returns A variable that references the output of the step.
+   *
+   * @example
+   * const { prompt, answer } = step('prompt_completion', {
+   *   prompt: 'Write a short story about dogs',
+   * })
+   */
   public step<TransformationId extends AllowedTransformationId>(
     transformation: TransformationId,
     params: TransformationInput<TransformationId>
@@ -144,10 +155,34 @@ export class Chain<
     title?: string;
     description?: string;
 
+    /**
+     * If true, the chain will be publicly triggerable. This means that anyone
+     * with the chain's ID will be able to run it and that you will be able to
+     * run the chain via `client.runChain`.
+     *
+     */
     publiclyTriggerable?: boolean;
 
+    /**
+     * Schemas for the inputs to your chain. This is optional, but if provided,
+     * we will check that the inputs to your chain are valid at runtime, and
+     * you get autocomplete for the inputs to your chain.
+     */
     params?: ChainParamsDefinition;
+
+    /**
+     * The setup function is where you define the steps of your chain. It is
+     * called with an object containing the params and a `step` function. You
+     * call `step` to add a step to your chain.
+     *
+     * You can return an object from the setup function, which will be used as
+     * the output of your chain. If you don't return anything, the output of
+     * your chain will be the output of the last step.
+     */
     setup(context: {
+      /**
+       * The inputs to the chain.
+       */
       params: Variable<Prettify<ParamsToTypedObject<ChainParamsDefinition>>>;
       step: (typeof Chain)["prototype"]["step"];
     }): ChainOutputDefinition | void | null;
@@ -174,4 +209,7 @@ export class Chain<
   };
 }
 
+/**
+ * Define an AI chain. This is the main entry point for creating chains.
+ */
 export const defineChain: (typeof Chain)["define"] = Chain.define;
