@@ -20,6 +20,7 @@ export interface PromptCompletionInput {
 export interface PromptCompletionOutput {
   answer: string;
   prompt: string;
+  user_key_used: boolean;
 }
 
 export interface ApiCallInput {
@@ -278,6 +279,17 @@ export interface RegexOutput {
   found?: boolean;
 }
 
+export interface RunTransformationInput {
+  transformation_id: string;
+  params: {
+    [k: string]: any | undefined;
+  };
+}
+
+export interface RunTransformationOutput {
+  output: any;
+}
+
 export interface RunChainInput {
   studio_id: string;
   project?: string;
@@ -301,6 +313,11 @@ export interface RunChainOutput {
   errors: {
     body?: string;
     [k: string]: any | undefined;
+  }[];
+  cost?: number;
+  credits_used?: {
+    credits: number;
+    name: string;
   }[];
   executionTime: number;
 }
@@ -400,6 +417,7 @@ export type BuiltinTransformations = {
   export_to_file: { input: ExportToFileInput, output: ExportToFileOutput }
   object_key_filter: { input: ObjectKeyFilterInput, output: ObjectKeyFilterOutput }
   regex: { input: RegexInput, output: RegexOutput }
+  run_transformation: { input: RunTransformationInput, output: RunTransformationOutput }
   run_chain: { input: RunChainInput, output: RunChainOutput }
   trigger_workflow: { input: TriggerWorkflowInput, output: TriggerWorkflowOutput }
   split_text: { input: SplitTextInput, output: SplitTextOutput }
