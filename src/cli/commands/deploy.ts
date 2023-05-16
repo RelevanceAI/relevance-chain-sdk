@@ -105,7 +105,7 @@ ${errorResults.join("\n")}
         const api = new API();
         await api.saveChains({
           updates: successResults.map((result) => {
-            return { ...result.chainConfig };
+            return { ...result.chainConfig, tags: { source: "sdk" } };
           }),
           version: versionToUse,
         });

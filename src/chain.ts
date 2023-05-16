@@ -8,6 +8,7 @@ import {
 import { API, APIAuthDetails } from "./api";
 import {
   AllowedTransformationId,
+  ArrayItem,
   ChainConfig,
   LooseAutoComplete,
   ParamSchema,
@@ -165,28 +166,50 @@ return (() => {
     }) as any;
   }
 
-  // private foreachContext: any[] | Variable<any[]> | null = null;
-  // public foreach<
-  //   Var extends any[] | Variable<any[]>,
-  //   Fn extends (args: { item: any; index: number }) => any
-  // >(variable: Var, fn: Fn): Array<ReturnType<Fn>> {
-  //   if (this.foreachContext) {
-  //     throw new Error("Nested foreach not supported at the moment.");
-  //   }
+  private foreachContext: any[] | Variable<any[]> | null = null;
+  /**
+   * Run 1 step for each item in the array.
+   *
+   * Note: foreach for multiple steps at once is not supported at the moment.
+   */
+  public foreach<
+    Var extends any[] | Variable<any[]>,
+    Fn extends (foreachData: {
+      item: Variable<ArrayItem<UnwrapVariable<Var>>>;
+      index: number;
+    }) => any
+  >(variable: Var, fn: Fn): Variable<Array<ReturnType<Fn>>> {
+    if (this.foreachContext) {
+      throw new Error("Nested foreach not supported at the moment.");
+    }
 
-  //   // set foreach context
-  //   this.foreachContext = variable;
+    // set foreach context
+    this.foreachContext = variable;
 
-  //   const result = fn({
-  //     item: createVariable<any>({ path: "foreach.item" }),
-  //     index: createVariable<number>({ path: "foreach.index" }),
-  //   });
+    const numStepsBefore = this.steps.length;
 
-  //   // reset context
-  //   this.foreachContext = null;
+    fn({
+      item: createVariable<any>({ path: "foreach.item" }),
+      index: createVariable<number>({ path: "foreach.index" }),
+    });
 
-  //   return createVariable<Array<any>>({ path: "" });
-  // }
+    const numStepsAfter = this.steps.length;
+    if (numStepsAfter - numStepsBefore !== 1) {
+      throw new Error(
+        "You must call `step` once and only once inside the `foreach` callback."
+      );
+    }
+
+    // reset context
+    this.foreachContext = null;
+
+    // Non-null assertion is ok since we just checked that at least 1 item was added
+    const lastStep = this.steps[this.steps.length - 1]!;
+
+    return createVariable<Array<ReturnType<Fn>>>({
+      path: `steps.${lastStep.name}.results`,
+    });
+  }
 
   public defineOutput(output: OutputDefinition) {
     if (this.output) {
@@ -272,6 +295,7 @@ return (() => {
       step: (typeof Chain)["prototype"]["step"];
       runIf: (typeof Chain)["prototype"]["runIf"];
       code: (typeof Chain)["prototype"]["code"];
+      foreach: (typeof Chain)["prototype"]["foreach"];
     }): ChainOutputDefinition | void | null;
   }) => {
     const chain = new Chain<ChainParamsDefinition, ChainOutputDefinition>();
@@ -290,6 +314,7 @@ return (() => {
       step: chain.step.bind(chain),
       runIf: chain.runIf.bind(chain),
       code: chain.code.bind(chain),
+      foreach: chain.foreach.bind(chain),
     });
     if (output) {
       chain.defineOutput(output);

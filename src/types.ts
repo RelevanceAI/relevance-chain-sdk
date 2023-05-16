@@ -182,3 +182,5 @@ export type RunChainOutput<
   executionTime?: number;
   errors: { raw: string; body: string; stepName?: string }[];
 } & (ReturnState extends true ? { state: ChainState } : { state?: undefined });
+
+export type ArrayItem<T extends any[]> = T extends (infer U)[] ? U : never;
