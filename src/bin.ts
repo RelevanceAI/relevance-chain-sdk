@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import "cross-fetch/polyfill";
 import { runCli } from "./cli";
 
 runCli()

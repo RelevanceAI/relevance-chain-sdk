@@ -370,6 +370,17 @@ export interface TruncateTextOutput {
   [k: string]: any | undefined;
 }
 
+export interface BrowserlessScrapeInput {
+  website_url: string;
+  element_selector?: any[];
+}
+
+export interface BrowserlessScrapeOutput {
+  output: {
+    [k: string]: any | undefined;
+  };
+}
+
 export type BuiltinTransformations = {
   prompt_completion: { input: PromptCompletionInput, output: PromptCompletionOutput }
   api_call: { input: ApiCallInput, output: ApiCallOutput }
@@ -395,4 +406,5 @@ export type BuiltinTransformations = {
   upload_file_s3: { input: UploadFileS3Input, output: UploadFileS3Output }
   analyse_image: { input: AnalyseImageInput, output: AnalyseImageOutput }
   truncate_text: { input: TruncateTextInput, output: TruncateTextOutput }
+  browserless_scrape: { input: BrowserlessScrapeInput, output: BrowserlessScrapeOutput }
 }
