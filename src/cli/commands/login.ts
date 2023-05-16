@@ -20,7 +20,7 @@ export const login = new Command("login")
 
     const open = await import("open");
 
-    await open.default("https://chain-development.relevanceai.com/login/sdk");
+    await open.default("https://chain.relevanceai.com/login/sdk");
 
     const project = await text({
       message: "Your Relevance AI project ID:",
