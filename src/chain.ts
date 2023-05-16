@@ -1,4 +1,4 @@
-import { UnwrapVariable, Variable, createVariable } from "./variable";
+import { UnwrapVariable, Variable, createVariable, toPath } from "./variable";
 import { API, APIAuthDetails } from "./api";
 import {
   AllowedTransformationId,
@@ -13,6 +13,7 @@ import {
   TransformationsMap,
 } from "./types";
 import { jsonClone } from "./utils";
+import { JsCodeTransformationOutput } from "./generated/transformation-types";
 
 export class Chain<
   ParamsDefinition extends Record<string, ParamSchema>,
@@ -94,14 +95,82 @@ export class Chain<
       }`;
     }
 
-    this.steps.push({
+    const step: TransformationStep = {
       name: stepName,
       transformation,
       params,
-    });
+    };
+
+    if (this.runIfContext !== null) {
+      step.if = this.runIfContext;
+    }
+
+    this.steps.push(step);
 
     return createVariable({ path: `steps.${stepName}.output` });
   }
+
+  private runIfContext: any | Variable<any> | null = null;
+
+  public runIf<Fn extends () => any>(
+    condition: any | Variable<any>,
+    fn: Fn
+  ): ReturnType<Fn> {
+    if (this.runIfContext) {
+      throw new Error("Nested runIf not supported at the moment.");
+    }
+
+    // set runIf context
+    this.runIfContext = condition;
+
+    const result = fn();
+
+    // reset context
+    this.runIfContext = null;
+
+    return result;
+  }
+
+  public code<
+    CodeParams extends Record<string, Variable<any>>,
+    Fn extends (params: CodeParams) => any
+  >(
+    params: CodeParams,
+    fn: Fn
+  ): Omit<JsCodeTransformationOutput, "transformed"> & {
+    transformed: Variable<ReturnType<Fn>>;
+  } {
+    const paramsObjectContent = Object.entries(params)
+      .map(([key, variable]) => {
+        return `${JSON.stringify(key)}: ${toPath(variable)}`;
+      })
+      .join(",");
+
+    const fnString = fn.toString();
+
+    const codeAsIIFE = `
+return (() => {
+  const params = { ${paramsObjectContent} };
+  return (${fnString})(params);
+})();`.trim();
+
+    return this.step("js_code_transformation", {
+      code: codeAsIIFE,
+    }) as any;
+  }
+
+  // private foreachContext: any[] | Variable<any[]> | null = null;
+  // public foreach(variable: any[] | Variable<any[]>) {
+  //   if (this.foreachContext) {
+  //     throw new Error("Nested foreach not supported at the moment.");
+  //   }
+
+  //   // set foreach context
+  //   this.foreachContext = variable;
+
+  //   // reset context
+  //   this.foreachContext = null;
+  // }
 
   public defineOutput(output: OutputDefinition) {
     if (this.output) {
@@ -185,6 +254,8 @@ export class Chain<
        */
       params: Variable<Prettify<ParamsToTypedObject<ChainParamsDefinition>>>;
       step: (typeof Chain)["prototype"]["step"];
+      runIf: (typeof Chain)["prototype"]["runIf"];
+      code: (typeof Chain)["prototype"]["code"];
     }): ChainOutputDefinition | void | null;
   }) => {
     const chain = new Chain<ChainParamsDefinition, ChainOutputDefinition>();
@@ -201,6 +272,8 @@ export class Chain<
     const output = input.setup({
       params,
       step: chain.step.bind(chain),
+      runIf: chain.runIf.bind(chain),
+      code: chain.code.bind(chain),
     });
     if (output) {
       chain.defineOutput(output);

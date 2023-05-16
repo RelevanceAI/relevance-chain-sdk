@@ -22,7 +22,7 @@ export type UnwrapVariable<T> = T extends Variable<infer U>
 
 const PROXY_HANDLER: ProxyHandler<VariableInternal> = {
   get(target, key) {
-    const path = target[VARIABLE_INTERNAL].path;
+    const path = toPath(target);
 
     if (["toString", "toJSON", "valueOf", Symbol.toPrimitive].includes(key)) {
       return () => `{{${path}}}`;
@@ -49,4 +49,14 @@ export const createVariable = <T = Record<string, any>>(args: {
     { [VARIABLE_INTERNAL]: { path: args.path } },
     PROXY_HANDLER
   ) as unknown as Variable<T>;
+};
+
+export const isVariable = (value: any): value is Variable<any> => {
+  return (
+    typeof value === "object" && value !== null && VARIABLE_INTERNAL in value
+  );
+};
+
+export const toPath = (variable: Variable<unknown>): string => {
+  return variable[VARIABLE_INTERNAL].path;
 };
