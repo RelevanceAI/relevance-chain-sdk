@@ -4,12 +4,24 @@ interface VariableInternal {
   readonly [VARIABLE_INTERNAL]: { path: string };
 }
 
-export type Variable<T> = T extends Record<string, any>
+type ObjectValuesToArrays<T> = T extends Array<any>
+  ? T
+  : T extends string
+  ? T
+  : T extends Record<string, any>
+  ? {
+      [K in keyof T]: Array<ObjectValuesToArrays<T[K]>>;
+    }
+  : T;
+
+export type Variable<T> = T extends Array<infer Item>
+  ? Array<Variable<Item>> & {
+      "*": ObjectValuesToArrays<Variable<Item>>;
+    }
+  : T extends Record<string, any>
   ? {
       [K in keyof T]: Variable<T[K]>;
     }
-  : T extends Array<infer Item>
-  ? Array<Variable<Item>>
   : T & VariableInternal;
 
 export type UnwrapVariable<T> = T extends Variable<infer U>
@@ -28,9 +40,11 @@ const PROXY_HANDLER: ProxyHandler<VariableInternal> = {
       return () => `{{${path}}}`;
     }
 
-    if (typeof key === "string") {
+    if (typeof key === "string" || typeof key === "number") {
+      const newPath = key === "*" ? `${path}[${key}]` : `${path}.${key}`;
+
       return createVariable({
-        path: `${path}.${key}`,
+        path: newPath,
       });
     }
 

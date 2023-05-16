@@ -13,6 +13,7 @@ export interface PromptCompletionInput {
     role: "user" | "ai";
     message: string;
   }[];
+  system_prompt?: string;
   temperature?: number;
 }
 

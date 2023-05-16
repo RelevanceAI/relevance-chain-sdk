@@ -166,7 +166,10 @@ return (() => {
   }
 
   // private foreachContext: any[] | Variable<any[]> | null = null;
-  // public foreach(variable: any[] | Variable<any[]>) {
+  // public foreach<
+  //   Var extends any[] | Variable<any[]>,
+  //   Fn extends (args: { item: any; index: number }) => any
+  // >(variable: Var, fn: Fn): Array<ReturnType<Fn>> {
   //   if (this.foreachContext) {
   //     throw new Error("Nested foreach not supported at the moment.");
   //   }
@@ -174,8 +177,15 @@ return (() => {
   //   // set foreach context
   //   this.foreachContext = variable;
 
+  //   const result = fn({
+  //     item: createVariable<any>({ path: "foreach.item" }),
+  //     index: createVariable<number>({ path: "foreach.index" }),
+  //   });
+
   //   // reset context
   //   this.foreachContext = null;
+
+  //   return createVariable<Array<any>>({ path: "" });
   // }
 
   public defineOutput(output: OutputDefinition) {
