@@ -1,4 +1,9 @@
-import { ChainRunnable, InferChainInput, RunChainOutput } from "./types";
+import {
+  ChainRunnable,
+  InferChainInput,
+  InferChainOutput,
+  RunChainOutput,
+} from "./types";
 
 export class Client {
   private region: string;
@@ -12,7 +17,7 @@ export class Client {
   runChain<Chain extends ChainRunnable>(
     chainId: string,
     params: InferChainInput<Chain>
-  ): Promise<ReturnType<Chain["run"]>>;
+  ): Promise<InferChainOutput<Chain>>;
   runChain<
     Params extends Record<string, Exclude<any, Function>>,
     Output extends Record<string, any>
