@@ -1,4 +1,10 @@
-import { UnwrapVariable, Variable, createVariable, toPath } from "./variable";
+import {
+  UnwrapVariable,
+  Variable,
+  createVariable,
+  toOptionalPath,
+  toPath,
+} from "./variable";
 import { API, APIAuthDetails } from "./api";
 import {
   AllowedTransformationId,
@@ -133,7 +139,7 @@ export class Chain<
 
   public code<
     CodeParams extends Record<string, Variable<any>>,
-    Fn extends (params: CodeParams) => any
+    Fn extends (params: UnwrapVariable<CodeParams>) => any
   >(
     params: CodeParams,
     fn: Fn
@@ -142,7 +148,7 @@ export class Chain<
   } {
     const paramsObjectContent = Object.entries(params)
       .map(([key, variable]) => {
-        return `${JSON.stringify(key)}: ${toPath(variable)}`;
+        return `${JSON.stringify(key)}: ${toOptionalPath(variable)}`;
       })
       .join(",");
 
@@ -150,8 +156,8 @@ export class Chain<
 
     const codeAsIIFE = `
 return (() => {
-  const params = { ${paramsObjectContent} };
-  return (${fnString})(params);
+  const _$$params = { ${paramsObjectContent} };
+  return (${fnString})(_$$params);
 })();`.trim();
 
     return this.step("js_code_transformation", {

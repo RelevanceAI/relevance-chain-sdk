@@ -60,3 +60,7 @@ export const isVariable = (value: any): value is Variable<any> => {
 export const toPath = (variable: Variable<unknown>): string => {
   return variable[VARIABLE_INTERNAL].path;
 };
+
+export const toOptionalPath = (variable: Variable<unknown>): string => {
+  return toPath(variable).split(".").join("?.");
+};
