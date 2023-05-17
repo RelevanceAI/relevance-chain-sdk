@@ -8,7 +8,7 @@
 
 export interface PromptCompletionInput {
   prompt: string;
-  model?: string;
+  model?: "openai-gpt35" | "openai-gpt4" | "anthropic-claude-instant-v1" | "anthropic-claude-v1";
   history?: {
     role: "user" | "ai";
     message: string;

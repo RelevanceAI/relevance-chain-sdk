@@ -12,11 +12,18 @@
   ],
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js",
       "node": "./dist/index.js",
-      "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.mjs",
+      "require": "./dist/client.js",
+      "node": "./dist/client.js",
+      "default": "./dist/client.js"
     }
   },
   "bin": {
