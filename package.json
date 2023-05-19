@@ -40,7 +40,8 @@
     "cli:dev": "tsx src/bin",
     "type-check": "tsc src/index.ts --noEmit",
     "generate": "tsx src/scripts/generate.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest",
+    "typecheck": "vitest typecheck"
   },
   "keywords": [],
   "author": "Relevance AI (https://relevanceai.com)",
@@ -55,7 +56,8 @@
     "json-schema-to-typescript": "^13.0.1",
     "tsup": "^6.7.0",
     "tsx": "^3.12.7",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "vitest": "0.31.1"
   },
   "dependencies": {
     "@clack/prompts": "^0.6.3",
