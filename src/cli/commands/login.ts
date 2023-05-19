@@ -13,7 +13,8 @@ export const login = new Command("login")
           "You are already logged in. Would you like to log in again? This will overwrite your current login details.",
       });
 
-      if (!confirmed) {
+      // need to check explicitly to handle cancel
+      if (confirmed !== true) {
         return;
       }
     }
