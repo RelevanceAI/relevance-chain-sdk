@@ -15,7 +15,7 @@ import {
   ParamsToTypedObject,
   Prettify,
   TransformationInput,
-  TransformationOUtput,
+  TransformationOutput,
   TransformationStep,
   TransformationsMap,
 } from "./types";
@@ -86,7 +86,7 @@ export class Chain<
   public step<TransformationId extends AllowedTransformationId>(
     transformation: TransformationId,
     params: TransformationInput<TransformationId>
-  ): Variable<TransformationOUtput<TransformationId>>;
+  ): Variable<TransformationOutput<TransformationId>>;
   public step(
     transformation: LooseAutoComplete<keyof TransformationsMap>,
     params: Record<string, any>
@@ -177,7 +177,7 @@ return (() => {
     Fn extends (foreachData: {
       item: Variable<ArrayItem<UnwrapVariable<Var>>>;
       index: number;
-    }) => any
+    }) => ReturnType<(typeof Chain)["prototype"]["step"]>
   >(variable: Var, fn: Fn): Variable<Array<ReturnType<Fn>>> {
     if (this.foreachContext) {
       throw new Error("Nested foreach not supported at the moment.");

@@ -4,9 +4,11 @@ interface VariableInternal {
   readonly [VARIABLE_INTERNAL]: { path: string };
 }
 
+type Primitive = string | number | boolean;
+
 type ObjectValuesToArrays<T> = T extends Array<any>
   ? T
-  : T extends string
+  : T extends Primitive
   ? T
   : T extends Record<string, any>
   ? {
@@ -14,7 +16,9 @@ type ObjectValuesToArrays<T> = T extends Array<any>
     }
   : T;
 
-export type Variable<T> = T extends Array<infer Item>
+export type Variable<T> = T extends Primitive
+  ? T & VariableInternal
+  : T extends Array<infer Item>
   ? Array<Variable<Item>> & {
       "*": ObjectValuesToArrays<Variable<Item>>;
     }

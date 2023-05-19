@@ -150,7 +150,7 @@ type TransformationDetails<TransformationId extends AllowedTransformationId> =
 export type TransformationInput<
   TransformationId extends AllowedTransformationId
 > = TransformationDetails<TransformationId>["input"];
-export type TransformationOUtput<
+export type TransformationOutput<
   TransformationId extends AllowedTransformationId
 > = TransformationDetails<TransformationId>["output"];
 

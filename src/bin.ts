@@ -1,7 +1,12 @@
 #!/usr/bin/env node
 
-import "cross-fetch/polyfill";
+import { fetch, Headers, Request, Response } from "cross-fetch";
 import { runCli } from "./cli";
+
+global.fetch = fetch;
+global.Response = Response;
+global.Headers = Headers;
+global.Request = Request;
 
 runCli()
   .then(() => process.exit())
