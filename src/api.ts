@@ -147,6 +147,7 @@ export class API {
 
   async unshareChain(chainId: string, shareId: string): Promise<void> {
     await this.request(`/studios/${chainId}/delete_share_link`, {
+      method: "POST",
       body: JSON.stringify({
         share_id: shareId,
       }),

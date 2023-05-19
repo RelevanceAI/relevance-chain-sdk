@@ -1,7 +1,6 @@
 import { readdir } from "node:fs/promises";
 import path from "node:path";
 import { Command } from "commander";
-import { Chain } from "../../chain";
 import {
   CHAINS_FOLDER_PATH_ABSOLUTE,
   isChain,
@@ -9,13 +8,14 @@ import {
 } from "../utils";
 import { CHAINS_FOLDER_PATH_RELATIVE } from "../utils";
 import { API } from "../../api";
-import { ChainConfig } from "../../types";
 import kleur from "kleur";
 import { getAuthDetailsFromEnv } from "../../env";
+import { confirm, select } from "@clack/prompts";
 
 const CHAIN_FILE_EXTENSIONS = [".ts", ".mts", ".cts", ".js", ".mjs", ".cjs"];
 
 export const deploy = new Command("deploy")
+  .description("Deploy your chains to Relevance AI")
   // .option(
   //   "--prod",
   //   "If provided, chains will be deployed to production. Otherwise you will get a preview deployment",
@@ -70,6 +70,10 @@ export const deploy = new Command("deploy")
             const config = chain.toJSON();
             return {
               path: fullFilePath,
+              prettyPath: fullFilePath.replace(
+                CHAINS_FOLDER_PATH_ABSOLUTE,
+                "chains"
+              ),
               chainConfig: config,
             };
           })
@@ -98,11 +102,66 @@ ${errorResults.join("\n")}
 `);
       }
 
+      const api = new API();
+      const getChainsByIds = async () => {
+        const chains = await api.getChainsByIds(
+          successResults.map((result) => result.chainConfig.studio_id)
+        );
+        const chainsById = Object.fromEntries(
+          chains.map((c) => [c.studio_id, c])
+        );
+        return chainsById;
+      };
+      const chainsBefore = await getChainsByIds();
+
+      const existingChainsNotCreatedBySDK = successResults.filter((result) => {
+        const existingChain = chainsBefore[result.chainConfig.studio_id];
+        // if the chain doesn't exist, we can deploy without issue
+        if (!existingChain) return false;
+
+        return existingChain.tags?.source !== "sdk";
+      });
+
+      if (existingChainsNotCreatedBySDK.length) {
+        console.log(
+          kleur.yellow(
+            `Warning: The following chains already exist and were not created by the SDK.`
+          )
+        );
+        existingChainsNotCreatedBySDK.forEach((chain) => {
+          console.log(
+            `- ${
+              chain.chainConfig.title || chain.chainConfig.studio_id
+            } ${kleur.dim(`(${chain.prettyPath})`)}`
+          );
+        });
+
+        const shouldContinue = await select({
+          message: "Do you want to deploy anyway?",
+          options: [
+            {
+              value: false,
+              label: "No",
+              hint: "this will cancel the deployment, and you will need to rename your chains before deploying again",
+            },
+            {
+              value: true,
+              label: "Yes",
+              hint: "this will overwrite the existing chains, and you will not be able to edit them from the notebook",
+            },
+          ],
+          initialValue: false,
+        });
+
+        if (shouldContinue !== true) {
+          return;
+        }
+      }
+
       const deploy = async (version: string) => {
         const versionToUse = version || "" + Math.random();
         const { region } = getAuthDetailsFromEnv();
 
-        const api = new API();
         await api.saveChains({
           updates: successResults.map((result) => {
             return { ...result.chainConfig, tags: { source: "sdk" } };
@@ -145,12 +204,12 @@ ${errorResults.join("\n")}
               }
 
               return {
+                ...result,
                 chainConfig: {
                   ...result.chainConfig,
                   project: savedChain.project!,
                   region,
                 },
-                path: result.path,
               };
             })
           )
@@ -164,10 +223,10 @@ ${errorResults.join("\n")}
         successText: "Deployed your chains to production 🚀",
       });
 
-      chainsWithProjectAndRegion.forEach(({ chainConfig, path }) => {
+      chainsWithProjectAndRegion.forEach(({ chainConfig, prettyPath }) => {
         const lines = [
           `${kleur.green(chainConfig.studio_id)} ${kleur.dim(
-            `(${path.replace(CHAINS_FOLDER_PATH_ABSOLUTE, "chains")})`
+            `(${prettyPath})`
           )}`,
           `  Preview: ${kleur.underline(
             `https://chain.relevanceai.com/notebook/${chainConfig.region}/${chainConfig.project}/${chainConfig.studio_id}/split`
