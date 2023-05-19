@@ -9,6 +9,11 @@ on:
     branches:
       - main
 
+env:
+  RELEVANCE_REGION: ${{ secrets.TEST_RELEVANCE_REGION }}
+  RELEVANCE_PROJECT_ID: ${{ secrets.TEST_RELEVANCE_PROJECT_ID }}
+  RELEVANCE_API_KEY: ${{ secrets.TEST_RELEVANCE_API_KEY }}
+
 jobs:
   test:
     runs-on: ubuntu-latest
