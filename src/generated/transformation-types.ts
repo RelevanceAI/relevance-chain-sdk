@@ -14,13 +14,44 @@ export interface PromptCompletionInput {
     message: string;
   }[];
   system_prompt?: string;
+  strip_linebreaks?: boolean;
   temperature?: number;
+  validators?: (
+    | {
+        type?: "regex";
+        value?: {
+          pattern: string;
+          flags?: string;
+          [k: string]: any | undefined;
+        };
+        [k: string]: any | undefined;
+      }
+    | {
+        type?: "is_json";
+        value?: any;
+        [k: string]: any | undefined;
+      }
+    | {
+        type?: "jsonschema";
+        /**
+         * A JSONSchema object. For example: {"type": "object", "properties": {"name": {"type": "string"}}}
+         */
+        value?: {
+          [k: string]: any | undefined;
+        };
+        [k: string]: any | undefined;
+      }
+  )[];
 }
 
 export interface PromptCompletionOutput {
   answer: string;
   prompt: string;
   user_key_used: boolean;
+  validation_history: {
+    role: "user" | "ai";
+    message: string;
+  }[];
 }
 
 export interface ApiCallInput {
@@ -95,13 +126,13 @@ export interface SearchOutput {
 }
 
 export interface SearchArrayInput {
-  array: string[];
+  array: any[];
   query: string;
   page_size?: number;
 }
 
 export interface SearchArrayOutput {
-  results: string[];
+  results: any[];
 }
 
 export interface BulkUpdateInput {
@@ -369,6 +400,26 @@ export interface UploadFileS3Output {
   [k: string]: any | undefined;
 }
 
+/**
+ * Base class for all abstractmodels
+ *
+ */
+export interface SerperGoogleSearchInput {
+  search_query: string;
+  [k: string]: any | undefined;
+}
+
+/**
+ * Base class for all abstractmodels
+ *
+ */
+export interface SerperGoogleSearchOutput {
+  peopleAlsoAsk: any[];
+  relatedSearches: any[];
+  organic: any[];
+  [k: string]: any | undefined;
+}
+
 export interface AnalyseImageInput {
   image_url: string;
   prompt: string;
@@ -399,6 +450,34 @@ export interface BrowserlessScrapeOutput {
   };
 }
 
+export interface GetWebpageInput {
+  website_url: string;
+}
+
+export interface GetWebpageOutput {
+  contents: string;
+}
+
+export interface RunReactAgentInput {
+  task: string;
+  max_thoughts?: number;
+}
+
+export interface RunReactAgentOutput {
+  action_history: {
+    status: "complete" | "failure";
+    body: string;
+  }[];
+  /**
+   * Chain of thought for understanding actions taken.
+   */
+  chain_of_thought: string;
+  /**
+   * The answer to the question.
+   */
+  answer: string;
+}
+
 export type BuiltinTransformations = {
   prompt_completion: { input: PromptCompletionInput, output: PromptCompletionOutput }
   api_call: { input: ApiCallInput, output: ApiCallOutput }
@@ -423,7 +502,10 @@ export type BuiltinTransformations = {
   split_text: { input: SplitTextInput, output: SplitTextOutput }
   combine_array: { input: CombineArrayInput, output: CombineArrayOutput }
   upload_file_s3: { input: UploadFileS3Input, output: UploadFileS3Output }
+  serper_google_search: { input: SerperGoogleSearchInput, output: SerperGoogleSearchOutput }
   analyse_image: { input: AnalyseImageInput, output: AnalyseImageOutput }
   truncate_text: { input: TruncateTextInput, output: TruncateTextOutput }
   browserless_scrape: { input: BrowserlessScrapeInput, output: BrowserlessScrapeOutput }
+  get_webpage: { input: GetWebpageInput, output: GetWebpageOutput }
+  run_react_agent: { input: RunReactAgentInput, output: RunReactAgentOutput }
 }
