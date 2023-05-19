@@ -1,7 +1,6 @@
 import { readdir } from "node:fs/promises";
 import path from "node:path";
 import { Command } from "commander";
-import { Chain } from "../../chain";
 import {
   CHAINS_FOLDER_PATH_ABSOLUTE,
   isChain,
@@ -9,13 +8,13 @@ import {
 } from "../utils";
 import { CHAINS_FOLDER_PATH_RELATIVE } from "../utils";
 import { API } from "../../api";
-import { ChainConfig } from "../../types";
 import kleur from "kleur";
 import { getAuthDetailsFromEnv } from "../../env";
 
 const CHAIN_FILE_EXTENSIONS = [".ts", ".mts", ".cts", ".js", ".mjs", ".cjs"];
 
 export const deploy = new Command("deploy")
+  .description("Deploy your chains to Relevance AI")
   // .option(
   //   "--prod",
   //   "If provided, chains will be deployed to production. Otherwise you will get a preview deployment",

@@ -8,6 +8,7 @@ import { deploy } from "./commands/deploy";
 import { init } from "./commands/init";
 import { login } from "./commands/login";
 import { keys } from "./commands/keys";
+import { version } from "./commands/version";
 
 dotenv.config();
 dotenv.config({
@@ -19,6 +20,7 @@ program
   .addHelpCommand()
   // .addCommand(init)
   // .addCommand(dev)
+  .addCommand(version)
   .addCommand(login)
   .addCommand(keys)
   .addCommand(deploy);
