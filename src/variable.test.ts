@@ -49,5 +49,3 @@ describe("variable types", () => {
     expectTypeOf(v2["*"].user_key_used).toMatchTypeOf<boolean[]>();
   });
 });
-
-describe("variable path generation", () => {});
