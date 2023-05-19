@@ -4,7 +4,10 @@
 
 ![Relevance AI stack](head-illustration.png)
 
-![npm](https://img.shields.io/npm/dw/@relevanceai/chain) ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/relevanceai/relevance-chain-sdk) ![Discord](https://img.shields.io/discord/1107542094672842762) ![Twitter Follow](https://img.shields.io/twitter/follow/relevanceai_?style=social)
+[![npm](https://img.shields.io/npm/dw/@relevanceai/chain)](https://www.npmjs.com/package/@relevanceai/chain)
+[![GitHub commit activity](https://img.shields.io/github/commit-activity/w/relevanceai/relevance-chain-sdk)](https://github.com/RelevanceAI/relevance-chain-sdk)
+[![Discord](https://img.shields.io/discord/1107542094672842762)](https://discord.com/invite/8VHJJrQZMM) 
+[![Twitter Follow](https://img.shields.io/twitter/follow/relevanceai_?style=social)](https://twitter.com/RelevanceAI_)
 
 </div>
 
@@ -36,14 +39,12 @@ Represent the chain in code exporting `defineChain` and configure the chain. The
 ```typescript
 import { defineChain } from '@relevanceai/chain';
 
-export default chain(
-    {
-        title: 'PDF Q&A',
-        params: {
-            question: { type: 'string' },
-            file_url: { type: 'string' }
-        }
-    },
+export default defineChain({
+    title: 'PDF Q&A',
+    params: {
+        question: { type: 'string' },
+        file_url: { type: 'string' }
+    }
     setup(({ params, step }) => {
         const { question, file_url } = params;
 
@@ -56,7 +57,7 @@ export default chain(
             answer
         }
     })
-);
+});
 ```
 
 Deploy the chains
