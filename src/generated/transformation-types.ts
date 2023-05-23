@@ -8,7 +8,13 @@
 
 export interface PromptCompletionInput {
   prompt: string;
-  model?: "openai-gpt35" | "openai-gpt4" | "anthropic-claude-instant-v1" | "anthropic-claude-v1";
+  model?:
+    | "openai-gpt35"
+    | "openai-gpt4"
+    | "palm-chat-bison"
+    | "palm-text-bison"
+    | "anthropic-claude-instant-v1"
+    | "anthropic-claude-v1";
   history?: {
     role: "user" | "ai";
     message: string;
@@ -248,10 +254,12 @@ export interface JoinArrayOutput {
 
 export interface PdfToTextInput {
   pdf_url: string;
+  use_ocr?: boolean;
 }
 
 export interface PdfToTextOutput {
   text: string;
+  number_of_pages: number;
 }
 
 export interface AudioToTextInput {
@@ -349,6 +357,8 @@ export interface RunChainOutput {
   credits_used?: {
     credits: number;
     name: string;
+    num_units?: number;
+    multiplier?: number;
   }[];
   executionTime: number;
 }
