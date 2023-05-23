@@ -68,3 +68,8 @@ relevance deploy
 ## Documentation
 
 See our full documentation [here](https://documentation.relevanceai.com).
+
+
+# Re-generating & publishing transformation types
+
+Run `scripts/update-codegen.sh` and publish the draft release that gets created.
