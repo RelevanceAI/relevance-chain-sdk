@@ -59,7 +59,7 @@ export const deploy = new Command("deploy")
 
             if (!isChain(chain)) {
               throw new Error(
-                `Chain ${file} does not export a Chain instance as default export`
+                `Chain ${file} does not export a Chain instance as the default export`
               );
             }
 
