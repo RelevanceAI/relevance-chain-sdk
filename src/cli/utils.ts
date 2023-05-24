@@ -13,9 +13,15 @@ export const chainsFolderExists = async () => {
   return existsSync(CHAINS_FOLDER_PATH_ABSOLUTE);
 };
 
-export const isChain = (chain: any): chain is Chain<any, any> =>
-  chain instanceof Chain ||
-  ("$RELEVANCE_CHAIN_BRAND" in chain && chain.$RELEVANCE_CHAIN_BRAND === true);
+export const isChain = (chain: any): chain is Chain<any, any> => {
+  if (!chain || typeof chain !== "object" || Array.isArray(chain)) return false;
+
+  if (chain instanceof Chain) return true;
+
+  return (
+    "$RELEVANCE_CHAIN_BRAND" in chain && chain.$RELEVANCE_CHAIN_BRAND === true
+  );
+};
 
 export const requireAuthDetails =
   <Fn extends (...args: any[]) => any>(fn: Fn) =>
