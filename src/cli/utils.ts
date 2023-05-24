@@ -14,7 +14,7 @@ export const chainsFolderExists = async () => {
 };
 
 export const isChain = (chain: any): chain is Chain<any, any> => {
-  if (!chain || typeof chain !== "object") return false;
+  if (!chain || typeof chain !== "object" || Array.isArray(chain)) return false;
 
   if (chain instanceof Chain) return true;
 
