@@ -8,6 +8,6 @@ export const keys = new Command("keys")
     requireAuthDetails(async () => {
       const open = await import("open");
       const { region, project } = getAuthDetailsFromEnv();
-      open.default(`https://chain.relevanceai.com/${region}/${project}/api`);
+      open.default(`https://chain.relevanceai.com/api/${region}/${project}`);
     })
   );
