@@ -51,7 +51,7 @@ Answer:`,
       },
     });
 
-    expect(chain).toMatchInlineSnapshot(`
+    expect(chain.toJSON()).toMatchInlineSnapshot(`
       {
         "description": "",
         "params_schema": {
@@ -162,7 +162,9 @@ Summarise the above text.`,
       },
     });
 
-    expect(chain).toMatchInlineSnapshot(`
+    const chainJSON = chain.toJSON();
+
+    expect(chainJSON).toMatchInlineSnapshot(`
       {
         "description": "",
         "params_schema": {
@@ -197,6 +199,7 @@ Summarise the above text.`,
               "transformation": "split_text",
             },
             {
+              "foreach": "{{steps.split_text.output.chunks}}",
               "name": "prompt_completion",
               "params": {
                 "prompt": "
@@ -219,6 +222,7 @@ Summarise the above text.`,
         },
       }
     `);
+    expect(chainJSON.transformations.steps[2]?.foreach).toBeDefined();
 
     expectTypeOf<InferChainInput<typeof chain>>().toMatchTypeOf<{
       pdf_url: string;
