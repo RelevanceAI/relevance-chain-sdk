@@ -112,6 +112,10 @@ export class Chain<
       step.if = this.runIfContext;
     }
 
+    if (this.foreachContext !== null) {
+      step.foreach = this.foreachContext;
+    }
+
     this.steps.push(step);
 
     return createVariable({ path: `steps.${stepName}.output` });
