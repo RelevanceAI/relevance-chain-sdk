@@ -39,12 +39,14 @@ Represent the chain in code exporting `defineChain` and configure the chain. The
 ```typescript
 import { defineChain } from '@relevanceai/chain';
 
-export default defineChain({
-    title: 'PDF Q&A',
-    params: {
-        question: { type: 'string' },
-        file_url: { type: 'string' }
-    }
+export default defineChain(
+    {
+        title: 'PDF Q&A',
+        params: {
+            question: { type: 'string' },
+            file_url: { type: 'string' }
+        }
+    },
     setup(({ params, step }) => {
         const { question, file_url } = params;
 
@@ -55,7 +57,7 @@ export default defineChain({
 
         return {
             answer
-        }
+        };
     })
 });
 ```
