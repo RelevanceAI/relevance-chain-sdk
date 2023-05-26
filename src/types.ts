@@ -1,7 +1,6 @@
 import type { JSONSchema4 } from "json-schema";
-import type { JSONSchema, FromSchema } from "json-schema-to-ts";
 import { BuiltinTransformations } from "./generated/transformation-types";
-import type { Chain } from "./chain";
+import { UnwrapVariable } from "./variable";
 
 export type ChainConfig = {
   _id?: string;
@@ -11,7 +10,7 @@ export type ChainConfig = {
   project?: string;
   /** JSONSchema object that user parameters will be validated against */
   params_schema: {
-    properties: Record<string, ParamSchema>;
+    properties: Record<string, ParamSchema<any>>;
   };
   /** Version */
   version?: string;
@@ -83,14 +82,16 @@ export type SchemaMetadata = {
   };
 };
 
-export type ParamSchema = JSONSchema4 & {
+export type ParamSchemaMetadata = {
   /**
    * The order in which the parameter should be displayed in the form.
    */
-  order?: number;
-  metadata?: SchemaMetadata;
-  items?: JSONSchema4 & { type: string };
+  order?: number | undefined;
+  metadata?: SchemaMetadata | undefined;
+  items?: JSONSchema4 | undefined;
 };
+
+export type ParamSchema<T> = JSONSchema4 & ParamSchemaMetadata;
 
 export type TransformationStepIfConditionValue = string | boolean | null;
 
@@ -111,8 +112,26 @@ export type Prettify<TType> = TType extends any[] | Date
   ? TType
   : { [K in keyof TType]: TType[K] };
 
-export type ParamsToTypedObject<T extends Record<string, ParamSchema>> = {
-  [K in keyof T]: T[K] extends JSONSchema ? FromSchema<T[K]> : any;
+export type TypedJsonSchema<T> = ParamSchema<T> & { $tsType: T };
+export type InferTypedJsonSchema<T extends TypedJsonSchema<any>> = T["$tsType"];
+
+export type ZodLike<T> =
+  | {
+      parse: (input: any) => T;
+    }
+  | { _output: T };
+
+export type ParamDefinitionInput = Record<
+  string,
+  TypedJsonSchema<any> | ParamSchema<any> | ZodLike<any>
+>;
+
+export type ParamsToTypedObject<T extends ParamDefinitionInput> = {
+  [K in keyof T]: T[K] extends ZodLike<infer U>
+    ? U
+    : T[K] extends TypedJsonSchema<infer U>
+    ? U
+    : any;
 };
 
 /**
@@ -157,13 +176,15 @@ export type TransformationOutput<
 export type LooseAutoComplete<T extends string> = T | (string & {});
 
 // Using this instead of `Chain<any,any>` for the types because TypeScript doesn't like it
-export type ChainRunnable = { run: (params: any) => Record<string, any> };
+export type ChainRunnable = {
+  run: (params: any) => Promise<Record<"output", Record<string, any>>>;
+};
 export type InferChainInput<Chain extends ChainRunnable> = Parameters<
   Chain["run"]
 >[0];
-export type InferChainOutput<Chain extends ChainRunnable> = Awaited<
-  ReturnType<Chain["run"]>
->["output"];
+export type InferChainOutput<Chain extends ChainRunnable> = UnwrapVariable<
+  Awaited<ReturnType<Chain["run"]>>["output"]
+>;
 
 export type RunChainOptions<ReturnState extends boolean = boolean> = {
   return_state?: ReturnState;
