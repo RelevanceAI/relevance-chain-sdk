@@ -11,19 +11,41 @@ import {
   ArrayItem,
   ChainConfig,
   LooseAutoComplete,
+  ParamDefinitionInput,
   ParamSchema,
+  ParamSchemaMetadata,
   ParamsToTypedObject,
   Prettify,
   TransformationInput,
   TransformationOutput,
   TransformationStep,
   TransformationsMap,
+  TypedJsonSchema,
 } from "./types";
 import { jsonClone } from "./utils";
 import { JsCodeTransformationOutput } from "./generated/transformation-types";
+import { ZodType } from "zod";
+import { zodToJsonSchema as _zodToJsonSchema } from "zod-to-json-schema";
+
+const zodToJsonSchema = (schema: ZodType<any>) => {
+  const s = _zodToJsonSchema(schema);
+  delete s.$schema;
+  return s;
+};
+
+export const jsonSchemaParam = <T extends any>(schema: ParamSchema<T>) =>
+  schema as unknown as TypedJsonSchema<T>;
+
+export const zodParam = <T extends any>(
+  schema: ZodType<T>,
+  metadata: ParamSchemaMetadata
+) => {
+  const jsonSchema = zodToJsonSchema(schema) as unknown as TypedJsonSchema<T>;
+  return { ...jsonSchema, ...metadata };
+};
 
 export class Chain<
-  ParamsDefinition extends Record<string, ParamSchema>,
+  ParamsDefinition extends ParamDefinitionInput,
   OutputDefinition extends Record<string, any>
 > {
   $RELEVANCE_CHAIN_BRAND = true;
@@ -64,7 +86,14 @@ export class Chain<
       );
     }
 
-    this.params = params;
+    this.params = Object.fromEntries(
+      Object.entries(params).map(([key, value]) => {
+        if (value instanceof ZodType) {
+          return [key, zodToJsonSchema(value)];
+        }
+        return [key, value];
+      })
+    );
     return createVariable<Prettify<ParamsToTypedObject<InnerParamsDefinition>>>(
       {
         path: "params",
@@ -261,7 +290,7 @@ return (() => {
   }
 
   static define = <
-    ChainParamsDefinition extends Record<string, ParamSchema>,
+    ChainParamsDefinition extends ParamDefinitionInput,
     ChainOutputDefinition extends Record<string, any>
   >(input: {
     title?: string;

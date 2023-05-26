@@ -1,6 +1,7 @@
 import { describe, test, expect, expectTypeOf } from "vitest";
-import { defineChain } from "./chain";
+import { defineChain, jsonSchemaParam } from "./chain";
 import { InferChainInput, InferChainOutput } from "./types";
+import { z } from "zod";
 
 describe("example chains", () => {
   test("basic pdf-qa chain", () => {
@@ -10,12 +11,10 @@ describe("example chains", () => {
       publiclyTriggerable: true,
 
       params: {
-        pdf_url: {
+        pdf_url: jsonSchemaParam<string>({
           type: "string",
-        },
-        question: {
-          type: "string",
-        },
+        }),
+        question: z.string(),
       },
       setup({ params, step }) {
         const { pdf_url, question } = params;
@@ -48,6 +47,19 @@ Answer:`,
         });
 
         return { answer };
+      },
+    });
+
+    const chainJson = chain.toJSON();
+
+    expect(chainJson.params_schema).toMatchObject({
+      properties: {
+        pdf_url: {
+          type: "string",
+        },
+        question: {
+          type: "string",
+        },
       },
     });
 
@@ -116,10 +128,11 @@ Answer:`,
       }
     `);
 
-    expectTypeOf<InferChainInput<typeof chain>>().toMatchTypeOf<{
+    expectTypeOf<InferChainInput<typeof chain>>().toEqualTypeOf<{
       pdf_url: string;
       question: string;
     }>();
+
     expectTypeOf<InferChainOutput<typeof chain>>().toMatchTypeOf<{
       answer: string;
     }>();
@@ -128,9 +141,9 @@ Answer:`,
   test("long pdf summarise", () => {
     const chain = defineChain({
       params: {
-        pdf_url: {
+        pdf_url: jsonSchemaParam<string>({
           type: "string",
-        },
+        }),
       },
       setup({ params, step, foreach }) {
         const { pdf_url } = params;
@@ -224,7 +237,7 @@ Summarise the above text.`,
     `);
     expect(chainJSON.transformations.steps[2]?.foreach).toBeDefined();
 
-    expectTypeOf<InferChainInput<typeof chain>>().toMatchTypeOf<{
+    expectTypeOf<InferChainInput<typeof chain>>().toEqualTypeOf<{
       pdf_url: string;
     }>();
     expectTypeOf<InferChainOutput<typeof chain>>().toMatchTypeOf<{
