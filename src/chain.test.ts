@@ -1,5 +1,5 @@
 import { describe, test, expect, expectTypeOf } from "vitest";
-import { defineChain, jsonSchemaParam } from "./chain";
+import { defineChain, jsonSchemaParam, zodParam } from "./chain";
 import { InferChainInput, InferChainOutput } from "./types";
 import { z } from "zod";
 
@@ -141,9 +141,7 @@ Answer:`,
   test("long pdf summarise", () => {
     const chain = defineChain({
       params: {
-        pdf_url: jsonSchemaParam<string>({
-          type: "string",
-        }),
+        pdf_url: zodParam(z.string()),
       },
       setup({ params, step, foreach }) {
         const { pdf_url } = params;

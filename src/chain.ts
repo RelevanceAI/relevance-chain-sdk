@@ -38,7 +38,7 @@ export const jsonSchemaParam = <T extends any>(schema: ParamSchema<T>) =>
 
 export const zodParam = <T extends any>(
   schema: ZodType<T>,
-  metadata: ParamSchemaMetadata
+  metadata: ParamSchemaMetadata = {}
 ) => {
   const jsonSchema = zodToJsonSchema(schema) as unknown as TypedJsonSchema<T>;
   return { ...jsonSchema, ...metadata };
