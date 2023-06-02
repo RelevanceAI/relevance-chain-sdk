@@ -135,7 +135,6 @@ export interface SearchArrayInput {
   array: any[];
   query: string;
   page_size?: number;
-  field?: string;
 }
 
 export interface SearchArrayOutput {
@@ -381,7 +380,6 @@ export interface SplitTextInput {
   text: string;
   method: "tokens" | "separator";
   num_tokens?: number;
-  num_tokens_to_slide_window?: number;
   sep?: string;
 }
 
