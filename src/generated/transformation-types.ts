@@ -14,7 +14,11 @@ export interface PromptCompletionInput {
     | "palm-chat-bison"
     | "palm-text-bison"
     | "anthropic-claude-instant-v1"
-    | "anthropic-claude-v1";
+    | "anthropic-claude-v1"
+    | "anthropic-claude-instant-v1-100k"
+    | "anthropic-claude-v1-100k"
+    | "cohere-command"
+    | "cohere-command-light";
   history?: {
     role: "user" | "ai";
     message: string;
@@ -24,25 +28,21 @@ export interface PromptCompletionInput {
   temperature?: number;
   validators?: (
     | {
-        type?: "regex";
-        value?: {
-          pattern: string;
-          flags?: string;
-          [k: string]: any | undefined;
-        };
+        _oneof_type_?: "regex";
+        pattern: string;
+        flags?: string;
         [k: string]: any | undefined;
       }
     | {
-        type?: "is_json";
-        value?: any;
+        _oneof_type_?: "is_json";
         [k: string]: any | undefined;
       }
     | {
-        type?: "jsonschema";
+        _oneof_type_?: "jsonschema";
         /**
          * A JSONSchema object. For example: {"type": "object", "properties": {"name": {"type": "string"}}}
          */
-        value?: {
+        schema?: {
           [k: string]: any | undefined;
         };
         [k: string]: any | undefined;
@@ -135,6 +135,7 @@ export interface SearchArrayInput {
   array: any[];
   query: string;
   page_size?: number;
+  field?: string;
 }
 
 export interface SearchArrayOutput {
@@ -380,6 +381,7 @@ export interface SplitTextInput {
   text: string;
   method: "tokens" | "separator";
   num_tokens?: number;
+  num_tokens_to_slide_window?: number;
   sep?: string;
 }
 
