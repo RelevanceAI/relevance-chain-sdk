@@ -40,6 +40,7 @@ export class Chain<
   private description = "";
 
   private publiclyTriggerable = false;
+  private public = false;
 
   constructor(authDetails?: APIAuthDetails) {
     this.api = new API(authDetails);
@@ -53,6 +54,9 @@ export class Chain<
   }
   public setPubliclyTriggerable(value: boolean) {
     this.publiclyTriggerable = value;
+  }
+  public setPublic(value: boolean) {
+    this.public = value ?? false;
   }
 
   public defineParams<InnerParamsDefinition extends ParamsDefinition>(
@@ -238,6 +242,7 @@ return (() => {
         output: this.output,
       },
       publicly_triggerable: this.publiclyTriggerable,
+      public: this.public,
     });
   }
 
@@ -274,6 +279,16 @@ return (() => {
      *
      */
     publiclyTriggerable?: boolean;
+
+    /**
+     * If true, the chain will be publicly visible in our templates gallery.
+     * This means that anyone will be able to see the chain in the notebook,
+     * including all steps and their parameters.
+     *
+     * **Note**: This does not deploy your chain. To deploy your chain, you
+     * will need to set `publicylyTriggerable` to true.
+     */
+    public?: boolean;
 
     /**
      * Schemas for the inputs to your chain. This is optional, but if provided,
@@ -313,6 +328,7 @@ return (() => {
       chain.setDescription(input.description);
     }
     chain.setPubliclyTriggerable(input.publiclyTriggerable ?? false);
+    chain.setPublic(input.public ?? false);
     const output = input.setup({
       params,
       step: chain.step.bind(chain),

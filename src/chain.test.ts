@@ -8,6 +8,7 @@ describe("example chains", () => {
       title: "Ask questions about a short PDF",
 
       publiclyTriggerable: true,
+      public: true,
 
       params: {
         pdf_url: {
@@ -64,6 +65,7 @@ Answer:`,
             },
           },
         },
+        "public": true,
         "publicly_triggerable": true,
         "studio_id": "LOCAL_DEV_CHAIN",
         "title": "Ask questions about a short PDF",
@@ -174,6 +176,7 @@ Summarise the above text.`,
             },
           },
         },
+        "public": false,
         "publicly_triggerable": false,
         "studio_id": "LOCAL_DEV_CHAIN",
         "title": "",
@@ -252,6 +255,7 @@ Summarise the above text.`,
         "params_schema": {
           "properties": {},
         },
+        "public": false,
         "publicly_triggerable": false,
         "studio_id": "LOCAL_DEV_CHAIN",
         "title": "",
