@@ -10,7 +10,10 @@ export interface PromptCompletionInput {
   prompt: string;
   model?:
     | "openai-gpt35"
+    | "openai-gpt35-16k"
+    | "openai-gpt35-0613"
     | "openai-gpt4"
+    | "openai-gpt4-0613"
     | "palm-chat-bison"
     | "palm-text-bison"
     | "anthropic-claude-instant-v1"
@@ -48,15 +51,25 @@ export interface PromptCompletionInput {
         [k: string]: any | undefined;
       }
   )[];
+  /**
+   * If a prompt variable is too long, split the variable into chunks, and run the entire prompt on each chunk. Very helpful for processing large pdfs.
+   */
+  split_and_map?: boolean;
 }
 
 export interface PromptCompletionOutput {
   answer: string;
   prompt: string;
-  user_key_used: boolean;
   validation_history: {
     role: "user" | "ai";
     message: string;
+  }[];
+  split_answers?: string[];
+  user_key_used: boolean;
+  credits_cost?: number;
+  errors?: {
+    body?: string;
+    [k: string]: any | undefined;
   }[];
 }
 
@@ -265,10 +278,43 @@ export interface PdfToTextOutput {
 
 export interface AudioToTextInput {
   audio_url: string;
+  response_type?: string;
 }
 
 export interface AudioToTextOutput {
   text: string;
+  language?: string;
+  duration?: number;
+  segments?: {
+    [k: string]: any | undefined;
+  }[];
+}
+
+export interface AudioToTextV2Input {
+  audio_url: string;
+  diarize?: boolean;
+}
+
+export interface AudioToTextV2Output {
+  metadata: {
+    duration?: number;
+    channels?: number;
+    [k: string]: any | undefined;
+  };
+  results: {
+    channels?: {
+      [k: string]: any | undefined;
+    }[];
+    [k: string]: any | undefined;
+  };
+}
+
+export interface AnonymizeTextInput {
+  input: string;
+}
+
+export interface AnonymizeTextOutput {
+  output: string;
 }
 
 export interface MarkdownInput {
@@ -426,8 +472,8 @@ export interface SerperGoogleSearchInput {
  *
  */
 export interface SerperGoogleSearchOutput {
-  peopleAlsoAsk: any[];
-  relatedSearches: any[];
+  peopleAlsoAsk?: any[];
+  relatedSearches?: any[];
   organic: any[];
   [k: string]: any | undefined;
 }
@@ -439,6 +485,15 @@ export interface AnalyseImageInput {
 
 export interface AnalyseImageOutput {
   output: string;
+}
+
+export interface TextToImageInput {
+  prompt: string;
+  num_outputs: 1 | 2 | 3 | 4;
+}
+
+export interface TextToImageOutput {
+  images: string[];
 }
 
 export interface TruncateTextInput {
@@ -454,6 +509,9 @@ export interface TruncateTextOutput {
 export interface BrowserlessScrapeInput {
   website_url: string;
   element_selector?: any[];
+  extra_headers?: {
+    [k: string]: any | undefined;
+  };
 }
 
 export interface BrowserlessScrapeOutput {
@@ -470,24 +528,69 @@ export interface GetWebpageOutput {
   contents: string;
 }
 
-export interface RunReactAgentInput {
-  task: string;
-  max_thoughts?: number;
+export interface TranslateInput {
+  text: string;
+  sourceLanguageCode?: string;
+  targetLanguageCode: string;
 }
 
-export interface RunReactAgentOutput {
-  action_history: {
-    status: "complete" | "failure";
-    body: string;
+export interface TranslateOutput {
+  result: string;
+}
+
+export interface ExcelToTextInput {
+  excel_url: string;
+}
+
+export interface ExcelToTextOutput {
+  text: string[];
+}
+
+export interface WordToTextInput {
+  doc_url: string;
+}
+
+export interface WordToTextOutput {
+  text: string;
+}
+
+export interface GetDatasetFieldInput {
+  dataset_id: string;
+  field: string;
+  page_size?: number;
+}
+
+export interface GetDatasetFieldOutput {
+  results: string[];
+}
+
+export interface FileToTextInput {
+  file_url: string;
+}
+
+export interface FileToTextOutput {
+  text: string;
+  detected_type: string;
+}
+
+export interface EchoInput {
+  data: any;
+  [k: string]: any | undefined;
+}
+
+export interface EchoOutput {
+  data: any;
+  [k: string]: any | undefined;
+}
+
+export interface SpreadsheetToJsonInput {
+  file_url: string;
+}
+
+export interface SpreadsheetToJsonOutput {
+  rows: {
+    [k: string]: any | undefined;
   }[];
-  /**
-   * Chain of thought for understanding actions taken.
-   */
-  chain_of_thought: string;
-  /**
-   * The answer to the question.
-   */
-  answer: string;
 }
 
 export type BuiltinTransformations = {
@@ -503,6 +606,8 @@ export type BuiltinTransformations = {
   join_array: { input: JoinArrayInput, output: JoinArrayOutput }
   pdf_to_text: { input: PdfToTextInput, output: PdfToTextOutput }
   audio_to_text: { input: AudioToTextInput, output: AudioToTextOutput }
+  audio_to_text_v2: { input: AudioToTextV2Input, output: AudioToTextV2Output }
+  anonymize_text: { input: AnonymizeTextInput, output: AnonymizeTextOutput }
   markdown: { input: MarkdownInput, output: MarkdownOutput }
   to_json: { input: ToJsonInput, output: ToJsonOutput }
   export_to_file: { input: ExportToFileInput, output: ExportToFileOutput }
@@ -516,8 +621,15 @@ export type BuiltinTransformations = {
   upload_file_s3: { input: UploadFileS3Input, output: UploadFileS3Output }
   serper_google_search: { input: SerperGoogleSearchInput, output: SerperGoogleSearchOutput }
   analyse_image: { input: AnalyseImageInput, output: AnalyseImageOutput }
+  text_to_image: { input: TextToImageInput, output: TextToImageOutput }
   truncate_text: { input: TruncateTextInput, output: TruncateTextOutput }
   browserless_scrape: { input: BrowserlessScrapeInput, output: BrowserlessScrapeOutput }
   get_webpage: { input: GetWebpageInput, output: GetWebpageOutput }
-  run_react_agent: { input: RunReactAgentInput, output: RunReactAgentOutput }
+  translate: { input: TranslateInput, output: TranslateOutput }
+  excel_to_text: { input: ExcelToTextInput, output: ExcelToTextOutput }
+  word_to_text: { input: WordToTextInput, output: WordToTextOutput }
+  get_dataset_field: { input: GetDatasetFieldInput, output: GetDatasetFieldOutput }
+  file_to_text: { input: FileToTextInput, output: FileToTextOutput }
+  echo: { input: EchoInput, output: EchoOutput }
+  spreadsheet_to_json: { input: SpreadsheetToJsonInput, output: SpreadsheetToJsonOutput }
 }

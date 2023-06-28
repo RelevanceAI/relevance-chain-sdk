@@ -24,24 +24,26 @@ const compile = async (schema: JSONSchema4, name: string) => {
 const main = async () => {
   const transformations = await fetchTransformations();
   const transformationTypes = await Promise.all(
-    transformations.map(async (transformation: any) => {
-      const id = transformation.transformation_id;
-      const pascalCasedName = pascalCase(id);
-      const inputTypeName = `${pascalCasedName}Input`;
-      const outputTypeName = `${pascalCasedName}Output`;
-      const [inputTs, outputTs] = await Promise.all([
-        compile(transformation.input_schema, inputTypeName),
-        compile(transformation.output_schema, outputTypeName),
-      ]);
-      return {
-        input: inputTs,
-        inputTypeName,
-        output: outputTs,
-        outputTypeName,
-        id,
-        pascalCasedName,
-      };
-    })
+    transformations
+      .filter((t) => t.execution_type === "inline")
+      .map(async (transformation: any) => {
+        const id = transformation.transformation_id;
+        const pascalCasedName = pascalCase(id);
+        const inputTypeName = `${pascalCasedName}Input`;
+        const outputTypeName = `${pascalCasedName}Output`;
+        const [inputTs, outputTs] = await Promise.all([
+          compile(transformation.input_schema, inputTypeName),
+          compile(transformation.output_schema, outputTypeName),
+        ]);
+        return {
+          input: inputTs,
+          inputTypeName,
+          output: outputTs,
+          outputTypeName,
+          id,
+          pascalCasedName,
+        };
+      })
   );
 
   const builtinTransformationsType = `
