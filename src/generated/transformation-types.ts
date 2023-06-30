@@ -158,6 +158,7 @@ export interface SearchArrayOutput {
 export interface BulkUpdateInput {
   dataset_id: string;
   documents: any[];
+  clean_field_names?: boolean;
   ingest_in_background?: boolean;
 }
 
@@ -516,7 +517,8 @@ export interface BrowserlessScrapeInput {
 
 export interface BrowserlessScrapeOutput {
   output: {
-    [k: string]: any | undefined;
+    page?: string;
+    selector?: string;
   };
 }
 
