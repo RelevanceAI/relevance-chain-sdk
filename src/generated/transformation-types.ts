@@ -55,6 +55,30 @@ export interface PromptCompletionInput {
    * If a prompt variable is too long, split the variable into chunks, and run the entire prompt on each chunk. Very helpful for processing large pdfs.
    */
   split_and_map?: boolean;
+  memory?: {
+    id?: string;
+    optimization?:
+      | {
+          type: "summarize";
+          prompt: string;
+        }
+      | {
+          type: "query";
+          query: string;
+        }
+      | {
+          type: "truncate";
+        };
+    data:
+      | {
+          type: "dataset";
+          dataset_id: string;
+        }
+      | {
+          type: "variable";
+          content: string;
+        };
+  }[];
 }
 
 export interface PromptCompletionOutput {
@@ -113,11 +137,11 @@ export interface JsCodeTransformationOutput {
 export interface SearchInput {
   dataset_id: string;
   query: string;
-  vector_field: string;
+  vector_field?: string;
   /**
    * The model name to use.
    */
-  model:
+  model?:
     | "image_text"
     | "text_image"
     | "all-mpnet-base-v2"
@@ -153,6 +177,7 @@ export interface SearchArrayInput {
 
 export interface SearchArrayOutput {
   results: any[];
+  scores: number[];
 }
 
 export interface BulkUpdateInput {
@@ -573,6 +598,9 @@ export interface FileToTextInput {
 export interface FileToTextOutput {
   text: string;
   detected_type: string;
+  metadata?: {
+    [k: string]: any | undefined;
+  };
 }
 
 export interface EchoInput {
@@ -593,6 +621,18 @@ export interface SpreadsheetToJsonOutput {
   rows: {
     [k: string]: any | undefined;
   }[];
+}
+
+export interface FuzzySearchInput {
+  query: string;
+  text: string;
+}
+
+export interface FuzzySearchOutput {
+  text: string;
+  match: string;
+  start: number;
+  end: number;
 }
 
 export type BuiltinTransformations = {
@@ -634,4 +674,5 @@ export type BuiltinTransformations = {
   file_to_text: { input: FileToTextInput, output: FileToTextOutput }
   echo: { input: EchoInput, output: EchoOutput }
   spreadsheet_to_json: { input: SpreadsheetToJsonInput, output: SpreadsheetToJsonOutput }
+  fuzzy_search: { input: FuzzySearchInput, output: FuzzySearchOutput }
 }
