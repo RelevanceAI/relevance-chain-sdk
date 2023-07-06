@@ -63,11 +63,16 @@ export type SchemaMetadata = {
     | "long_text"
     | "short_text"
     | "file_url"
-    | "code"
     | "llm_prompt"
+    | "speech"
+    | "code"
     | "dataset_id"
     | "markdown"
-    | "chain";
+    | "chain_id"
+    | "chain_params"
+    | "file_to_text"
+    | "memory"
+    | "memory_optimizer";
   min?: number;
   max?: number;
   accepted_file_types?: string[];

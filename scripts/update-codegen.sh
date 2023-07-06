@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -x
+
 # exit if gh command not installed
 if ! command -v gh &> /dev/null
 then
@@ -34,7 +36,7 @@ if [ -z "$types_diff" ]; then
   exit 1
 fi
 
-npm run test && npm run typecheck
+npm run test --watch=false && npm run typecheck --watch=false
 
 if [ $? -ne 0 ]; then
   echo "Tests or typecheck failed, exiting"
@@ -47,6 +49,6 @@ git commit -m "chore: update generated files"
 npx bumpp patch -y
 
 echo "pick latest version here"
-gh release create -d --generate-notes 
+gh release create -d --generate-notes
 
 echo "go to url above and publish release to publish to npm"
