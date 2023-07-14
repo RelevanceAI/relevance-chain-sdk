@@ -14,14 +14,14 @@ export interface PromptCompletionInput {
     | "openai-gpt35-0613"
     | "openai-gpt4"
     | "openai-gpt4-0613"
-    | "palm-chat-bison"
-    | "palm-text-bison"
     | "anthropic-claude-instant-v1"
     | "anthropic-claude-v1"
     | "anthropic-claude-instant-v1-100k"
     | "anthropic-claude-v1-100k"
-    | "cohere-command"
-    | "cohere-command-light";
+    | "palm-chat-bison"
+    | "palm-text-bison"
+    | "cohere-command-light"
+    | "cohere-command";
   history?: {
     role: "user" | "ai";
     message: string;
@@ -56,27 +56,34 @@ export interface PromptCompletionInput {
    */
   split_and_map?: boolean;
   memory?: {
-    id?: string;
+    variable?: string;
     optimization?:
       | {
           type: "summarize";
-          prompt: string;
+          prompt?: string;
+          model?:
+            | "openai-gpt35"
+            | "openai-gpt35-16k"
+            | "openai-gpt35-0613"
+            | "openai-gpt4"
+            | "openai-gpt4-0613"
+            | "anthropic-claude-instant-v1"
+            | "anthropic-claude-v1"
+            | "anthropic-claude-instant-v1-100k"
+            | "anthropic-claude-v1-100k"
+            | "palm-chat-bison"
+            | "palm-text-bison"
+            | "cohere-command-light"
+            | "cohere-command";
+          max_prompts?: number;
         }
       | {
           type: "query";
-          query: string;
+          query?: string;
+          fields?: string[];
         }
       | {
-          type: "truncate";
-        };
-    data:
-      | {
-          type: "dataset";
-          dataset_id: string;
-        }
-      | {
-          type: "variable";
-          content: string;
+          type: "all";
         };
   }[];
 }
@@ -95,6 +102,40 @@ export interface PromptCompletionOutput {
     body?: string;
     [k: string]: any | undefined;
   }[];
+  debug?: {
+    memory?: {
+      variable?: string;
+      optimization?:
+        | {
+            type: "summarize";
+            prompt?: string;
+            model?:
+              | "openai-gpt35"
+              | "openai-gpt35-16k"
+              | "openai-gpt35-0613"
+              | "openai-gpt4"
+              | "openai-gpt4-0613"
+              | "anthropic-claude-instant-v1"
+              | "anthropic-claude-v1"
+              | "anthropic-claude-instant-v1-100k"
+              | "anthropic-claude-v1-100k"
+              | "palm-chat-bison"
+              | "palm-text-bison"
+              | "cohere-command-light"
+              | "cohere-command";
+            max_prompts?: number;
+          }
+        | {
+            type: "query";
+            query?: string;
+            fields?: string[];
+          }
+        | {
+            type: "all";
+          };
+    }[];
+    [k: string]: any | undefined;
+  };
 }
 
 export interface ApiCallInput {
@@ -343,12 +384,89 @@ export interface AnonymizeTextOutput {
   output: string;
 }
 
+export interface NemoGuardrailsInput {
+  input: string;
+  usecase?: "Jailbreak Detection" | "Topic Control" | "Fact Checking";
+  documents?: any[];
+  colang_content?: string;
+  yaml_content?: string;
+}
+
+export interface NemoGuardrailsOutput {
+  output: string;
+}
+
 export interface MarkdownInput {
   markdown: string;
 }
 
 export interface MarkdownOutput {
   [k: string]: any | undefined;
+}
+
+export interface SummarizeKnowledgeInput {
+  knowledge: string;
+  optimization?:
+    | {
+        type: "summarize";
+        prompt?: string;
+        model?:
+          | "openai-gpt35"
+          | "openai-gpt35-16k"
+          | "openai-gpt35-0613"
+          | "openai-gpt4"
+          | "openai-gpt4-0613"
+          | "anthropic-claude-instant-v1"
+          | "anthropic-claude-v1"
+          | "anthropic-claude-instant-v1-100k"
+          | "anthropic-claude-v1-100k"
+          | "palm-chat-bison"
+          | "palm-text-bison"
+          | "cohere-command-light"
+          | "cohere-command";
+        max_prompts?: number;
+      }
+    | {
+        type: "query";
+        query?: string;
+        fields?: string[];
+      }
+    | {
+        type: "all";
+      };
+}
+
+export interface SummarizeKnowledgeOutput {
+  answer: string;
+  credits_cost: number;
+  optimization:
+    | {
+        type: "summarize";
+        prompt?: string;
+        model?:
+          | "openai-gpt35"
+          | "openai-gpt35-16k"
+          | "openai-gpt35-0613"
+          | "openai-gpt4"
+          | "openai-gpt4-0613"
+          | "anthropic-claude-instant-v1"
+          | "anthropic-claude-v1"
+          | "anthropic-claude-instant-v1-100k"
+          | "anthropic-claude-v1-100k"
+          | "palm-chat-bison"
+          | "palm-text-bison"
+          | "cohere-command-light"
+          | "cohere-command";
+        max_prompts?: number;
+      }
+    | {
+        type: "query";
+        query?: string;
+        fields?: string[];
+      }
+    | {
+        type: "all";
+      };
 }
 
 export interface ToJsonInput {
@@ -650,7 +768,9 @@ export type BuiltinTransformations = {
   audio_to_text: { input: AudioToTextInput, output: AudioToTextOutput }
   audio_to_text_v2: { input: AudioToTextV2Input, output: AudioToTextV2Output }
   anonymize_text: { input: AnonymizeTextInput, output: AnonymizeTextOutput }
+  nemo_guardrails: { input: NemoGuardrailsInput, output: NemoGuardrailsOutput }
   markdown: { input: MarkdownInput, output: MarkdownOutput }
+  summarize_knowledge: { input: SummarizeKnowledgeInput, output: SummarizeKnowledgeOutput }
   to_json: { input: ToJsonInput, output: ToJsonOutput }
   export_to_file: { input: ExportToFileInput, output: ExportToFileOutput }
   object_key_filter: { input: ObjectKeyFilterInput, output: ObjectKeyFilterOutput }
