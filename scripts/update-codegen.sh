@@ -36,7 +36,7 @@ if [ -z "$types_diff" ]; then
   exit 1
 fi
 
-npm run test --watch=false && npm run typecheck --watch=false
+npm run test -- --watch=false && npm run typecheck -- --watch=false
 
 if [ $? -ne 0 ]; then
   echo "Tests or typecheck failed, exiting"
