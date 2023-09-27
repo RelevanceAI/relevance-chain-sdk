@@ -14,7 +14,10 @@ export interface PromptCompletionInput {
     | "openai-gpt35-0613"
     | "openai-gpt4"
     | "openai-gpt4-0613"
+    | "anthropic-claude-v2"
     | "anthropic-claude-instant-v1"
+    | "meta-llama2-70b"
+    | "meta-llama-34b-instruct"
     | "anthropic-claude-v1"
     | "anthropic-claude-instant-v1-100k"
     | "anthropic-claude-v1-100k"
@@ -23,9 +26,21 @@ export interface PromptCompletionInput {
     | "cohere-command-light"
     | "cohere-command";
   history?: {
-    role: "user" | "ai";
-    message: string;
+    role: "user" | "ai" | "function";
+    message?: string;
+    /**
+     * Only needed if role === "function". This should be the name of the function whose output is in "message"
+     */
+    name?: string;
+    function_call?: {
+      name: string;
+      arguments: string;
+    };
   }[];
+  /**
+   * If true, prompt isn't included in what gets sent to the llm. mostly useful for re-prompting an llm after an function call
+   */
+  history_only?: boolean;
   system_prompt?: string;
   strip_linebreaks?: boolean;
   temperature?: number;
@@ -67,7 +82,10 @@ export interface PromptCompletionInput {
             | "openai-gpt35-0613"
             | "openai-gpt4"
             | "openai-gpt4-0613"
+            | "anthropic-claude-v2"
             | "anthropic-claude-instant-v1"
+            | "meta-llama2-70b"
+            | "meta-llama-34b-instruct"
             | "anthropic-claude-v1"
             | "anthropic-claude-instant-v1-100k"
             | "anthropic-claude-v1-100k"
@@ -80,20 +98,41 @@ export interface PromptCompletionInput {
       | {
           type: "query";
           query?: string;
+          query_type?: "keyword" | "vector";
           fields?: string[];
+          page_size?: number;
         }
       | {
           type: "all";
         };
   }[];
+  functions?: {
+    name: string;
+    description?: string;
+    /**
+     * JSONSchema for the params of the function
+     */
+    parameters?: {
+      [k: string]: any | undefined;
+    };
+  }[];
+  debug?: boolean;
 }
 
 export interface PromptCompletionOutput {
   answer: string;
   prompt: string;
   validation_history: {
-    role: "user" | "ai";
-    message: string;
+    role: "user" | "ai" | "function";
+    message?: string;
+    /**
+     * Only needed if role === "function". This should be the name of the function whose output is in "message"
+     */
+    name?: string;
+    function_call?: {
+      name: string;
+      arguments: string;
+    };
   }[];
   split_answers?: string[];
   user_key_used: boolean;
@@ -115,7 +154,10 @@ export interface PromptCompletionOutput {
               | "openai-gpt35-0613"
               | "openai-gpt4"
               | "openai-gpt4-0613"
+              | "anthropic-claude-v2"
               | "anthropic-claude-instant-v1"
+              | "meta-llama2-70b"
+              | "meta-llama-34b-instruct"
               | "anthropic-claude-v1"
               | "anthropic-claude-instant-v1-100k"
               | "anthropic-claude-v1-100k"
@@ -128,7 +170,9 @@ export interface PromptCompletionOutput {
         | {
             type: "query";
             query?: string;
+            query_type?: "keyword" | "vector";
             fields?: string[];
+            page_size?: number;
           }
         | {
             type: "all";
@@ -136,6 +180,18 @@ export interface PromptCompletionOutput {
     }[];
     [k: string]: any | undefined;
   };
+  history_items: {
+    role: "user" | "ai" | "function";
+    message?: string;
+    /**
+     * Only needed if role === "function". This should be the name of the function whose output is in "message"
+     */
+    name?: string;
+    function_call?: {
+      name: string;
+      arguments: string;
+    };
+  }[];
 }
 
 export interface ApiCallInput {
@@ -178,6 +234,7 @@ export interface JsCodeTransformationOutput {
 export interface SearchInput {
   dataset_id: string;
   query: string;
+  query_type?: "keyword" | "vector";
   vector_field?: string;
   /**
    * The model name to use.
@@ -196,7 +253,9 @@ export interface SearchInput {
     | "cohere-large"
     | "cohere-multilingual-22-12";
   content_field?: string;
+  output_all_fields?: boolean;
   page_size?: number;
+  raw_filters?: any[];
 }
 
 export interface SearchOutput {
@@ -283,6 +342,16 @@ export interface GenerateVectorEmbeddingOutput {
   [k: string]: any | undefined;
 }
 
+export interface SendEmailStepInput {
+  destinationEmail: string;
+  subject?: string;
+  text: string;
+}
+
+export interface SendEmailStepOutput {
+  [k: string]: any | undefined;
+}
+
 export interface RedisSearchInput {
   index: string;
   query: string;
@@ -336,6 +405,7 @@ export interface JoinArrayOutput {
 export interface PdfToTextInput {
   pdf_url: string;
   use_ocr?: boolean;
+  ocr_type?: "Fast & 95% accurate" | "Slow & 99.9% accurate";
 }
 
 export interface PdfToTextOutput {
@@ -404,6 +474,21 @@ export interface MarkdownOutput {
   [k: string]: any | undefined;
 }
 
+export interface RelevanceApiCallInput {
+  path: string;
+  method: "GET" | "POST" | "PUT";
+  body?: {
+    [k: string]: any | undefined;
+  };
+}
+
+export interface RelevanceApiCallOutput {
+  response_body: {
+    [k: string]: any | undefined;
+  };
+  status: number;
+}
+
 export interface SummarizeKnowledgeInput {
   knowledge: string;
   optimization?:
@@ -416,7 +501,10 @@ export interface SummarizeKnowledgeInput {
           | "openai-gpt35-0613"
           | "openai-gpt4"
           | "openai-gpt4-0613"
+          | "anthropic-claude-v2"
           | "anthropic-claude-instant-v1"
+          | "meta-llama2-70b"
+          | "meta-llama-34b-instruct"
           | "anthropic-claude-v1"
           | "anthropic-claude-instant-v1-100k"
           | "anthropic-claude-v1-100k"
@@ -429,11 +517,17 @@ export interface SummarizeKnowledgeInput {
     | {
         type: "query";
         query?: string;
+        query_type?: "keyword" | "vector";
         fields?: string[];
+        page_size?: number;
       }
     | {
         type: "all";
       };
+  /**
+   * The Summary generated will be limited to less than this many words.
+   */
+  token_limit?: number;
 }
 
 export interface SummarizeKnowledgeOutput {
@@ -449,7 +543,10 @@ export interface SummarizeKnowledgeOutput {
           | "openai-gpt35-0613"
           | "openai-gpt4"
           | "openai-gpt4-0613"
+          | "anthropic-claude-v2"
           | "anthropic-claude-instant-v1"
+          | "meta-llama2-70b"
+          | "meta-llama-34b-instruct"
           | "anthropic-claude-v1"
           | "anthropic-claude-instant-v1-100k"
           | "anthropic-claude-v1-100k"
@@ -462,7 +559,9 @@ export interface SummarizeKnowledgeOutput {
     | {
         type: "query";
         query?: string;
+        query_type?: "keyword" | "vector";
         fields?: string[];
+        page_size?: number;
       }
     | {
         type: "all";
@@ -489,10 +588,10 @@ export interface ExportToFileOutput {
 }
 
 export interface ObjectKeyFilterInput {
-  needle: any[] | string;
   haystack: {
     [k: string]: any | undefined;
   };
+  needle: any[] | string;
 }
 
 export interface ObjectKeyFilterOutput {
@@ -569,7 +668,7 @@ export interface TriggerWorkflowOutput {
 
 export interface SplitTextInput {
   text: string;
-  method: "tokens" | "separator";
+  method: "tokens" | "separator" | "newline";
   num_tokens?: number;
   num_tokens_to_slide_window?: number;
   sep?: string;
@@ -588,6 +687,39 @@ export interface CombineArrayInput {
 
 export interface CombineArrayOutput {
   combined: any;
+  [k: string]: any | undefined;
+}
+
+export interface PythonCodeTransformationInput {
+  packages?: string[];
+  run_commands?: string[];
+  code: string;
+  [k: string]: any | undefined;
+}
+
+export interface PythonCodeTransformationOutput {
+  /**
+   * Return value of provided code
+   */
+  transformed: {
+    [k: string]: any | undefined;
+  };
+  /**
+   * Duration of provided code in milliseconds
+   */
+  duration: number;
+  /**
+   * Return stdout of provided code
+   */
+  stdout: {
+    [k: string]: any | undefined;
+  };
+  /**
+   * Return stderr of provided code
+   */
+  stderr: {
+    [k: string]: any | undefined;
+  };
   [k: string]: any | undefined;
 }
 
@@ -619,6 +751,7 @@ export interface SerperGoogleSearchOutput {
   peopleAlsoAsk?: any[];
   relatedSearches?: any[];
   organic: any[];
+  user_key_used: boolean;
   [k: string]: any | undefined;
 }
 
@@ -640,6 +773,63 @@ export interface TextToImageOutput {
   images: string[];
 }
 
+export interface TextToSpeechInput {
+  prompt: string;
+  voice:
+    | "Rachel"
+    | "Clyde"
+    | "Domi"
+    | "Dave"
+    | "Fin"
+    | "Bella"
+    | "Antoni"
+    | "Thomas"
+    | "Charlie"
+    | "Emily"
+    | "Elli"
+    | "Callum"
+    | "Patrick"
+    | "Harry"
+    | "Liam"
+    | "Dorothy"
+    | "Josh"
+    | "Arnold"
+    | "Charlotte"
+    | "Matilda"
+    | "Matthew"
+    | "James"
+    | "Joseph"
+    | "Jeremy"
+    | "Michael"
+    | "Ethan"
+    | "Gigi"
+    | "Freya"
+    | "Grace"
+    | "Daniel"
+    | "Serena"
+    | "Adam"
+    | "Nicole"
+    | "Jessie"
+    | "Ryan"
+    | "Sam"
+    | "Glinda"
+    | "Giovanni"
+    | "Mimi";
+}
+
+export interface TextToSpeechOutput {
+  audio_url: string;
+}
+
+export interface StableDiffusionXlInput {
+  prompt: string;
+  steps?: number;
+}
+
+export interface StableDiffusionXlOutput {
+  images: string[];
+}
+
 export interface TruncateTextInput {
   text: string | any[];
   num_tokens: number;
@@ -650,8 +840,25 @@ export interface TruncateTextOutput {
   [k: string]: any | undefined;
 }
 
+export interface ConnectPlaystoreInput {
+  playstore_id: string;
+  sample_size?: number;
+  country: string;
+}
+
+export interface ConnectPlaystoreOutput {
+  output: {
+    reviewId?: string;
+    userName?: string;
+    userImage?: string;
+    content?: string;
+    [k: string]: any | undefined;
+  }[];
+}
+
 export interface BrowserlessScrapeInput {
   website_url: string;
+  method?: "Text" | "HTML";
   element_selector?: any[];
   extra_headers?: {
     [k: string]: any | undefined;
@@ -661,16 +868,11 @@ export interface BrowserlessScrapeInput {
 export interface BrowserlessScrapeOutput {
   output: {
     page?: string;
-    selector?: string;
+    selectors?: {
+      [k: string]: any | undefined;
+    };
   };
-}
-
-export interface GetWebpageInput {
-  website_url: string;
-}
-
-export interface GetWebpageOutput {
-  contents: string;
+  user_key_used: boolean;
 }
 
 export interface TranslateInput {
@@ -701,19 +903,19 @@ export interface WordToTextOutput {
 
 export interface GetDatasetFieldInput {
   dataset_id: string;
-  field: string;
+  field?: string;
   page_size?: number;
 }
 
 export interface GetDatasetFieldOutput {
-  results: string[];
+  results: any[];
 }
 
-export interface FileToTextInput {
+export interface FileToTextLlmFriendlyInput {
   file_url: string;
 }
 
-export interface FileToTextOutput {
+export interface FileToTextLlmFriendlyOutput {
   text: string;
   detected_type: string;
   metadata?: {
@@ -761,6 +963,7 @@ export type BuiltinTransformations = {
   search_array: { input: SearchArrayInput, output: SearchArrayOutput }
   bulk_update: { input: BulkUpdateInput, output: BulkUpdateOutput }
   generate_vector_embedding: { input: GenerateVectorEmbeddingInput, output: GenerateVectorEmbeddingOutput }
+  send_email_step: { input: SendEmailStepInput, output: SendEmailStepOutput }
   redis_search: { input: RedisSearchInput, output: RedisSearchOutput }
   redis_insert: { input: RedisInsertInput, output: RedisInsertOutput }
   join_array: { input: JoinArrayInput, output: JoinArrayOutput }
@@ -770,6 +973,7 @@ export type BuiltinTransformations = {
   anonymize_text: { input: AnonymizeTextInput, output: AnonymizeTextOutput }
   nemo_guardrails: { input: NemoGuardrailsInput, output: NemoGuardrailsOutput }
   markdown: { input: MarkdownInput, output: MarkdownOutput }
+  relevance_api_call: { input: RelevanceApiCallInput, output: RelevanceApiCallOutput }
   summarize_knowledge: { input: SummarizeKnowledgeInput, output: SummarizeKnowledgeOutput }
   to_json: { input: ToJsonInput, output: ToJsonOutput }
   export_to_file: { input: ExportToFileInput, output: ExportToFileOutput }
@@ -780,18 +984,21 @@ export type BuiltinTransformations = {
   trigger_workflow: { input: TriggerWorkflowInput, output: TriggerWorkflowOutput }
   split_text: { input: SplitTextInput, output: SplitTextOutput }
   combine_array: { input: CombineArrayInput, output: CombineArrayOutput }
+  python_code_transformation: { input: PythonCodeTransformationInput, output: PythonCodeTransformationOutput }
   upload_file_s3: { input: UploadFileS3Input, output: UploadFileS3Output }
   serper_google_search: { input: SerperGoogleSearchInput, output: SerperGoogleSearchOutput }
   analyse_image: { input: AnalyseImageInput, output: AnalyseImageOutput }
   text_to_image: { input: TextToImageInput, output: TextToImageOutput }
+  text_to_speech: { input: TextToSpeechInput, output: TextToSpeechOutput }
+  stable_diffusion_xl: { input: StableDiffusionXlInput, output: StableDiffusionXlOutput }
   truncate_text: { input: TruncateTextInput, output: TruncateTextOutput }
+  connect_playstore: { input: ConnectPlaystoreInput, output: ConnectPlaystoreOutput }
   browserless_scrape: { input: BrowserlessScrapeInput, output: BrowserlessScrapeOutput }
-  get_webpage: { input: GetWebpageInput, output: GetWebpageOutput }
   translate: { input: TranslateInput, output: TranslateOutput }
   excel_to_text: { input: ExcelToTextInput, output: ExcelToTextOutput }
   word_to_text: { input: WordToTextInput, output: WordToTextOutput }
   get_dataset_field: { input: GetDatasetFieldInput, output: GetDatasetFieldOutput }
-  file_to_text: { input: FileToTextInput, output: FileToTextOutput }
+  file_to_text_llm_friendly: { input: FileToTextLlmFriendlyInput, output: FileToTextLlmFriendlyOutput }
   echo: { input: EchoInput, output: EchoOutput }
   spreadsheet_to_json: { input: SpreadsheetToJsonInput, output: SpreadsheetToJsonOutput }
   fuzzy_search: { input: FuzzySearchInput, output: FuzzySearchOutput }
