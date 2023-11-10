@@ -12,8 +12,10 @@ export interface PromptCompletionInput {
     | "openai-gpt35"
     | "openai-gpt35-16k"
     | "openai-gpt35-0613"
+    | "openai-gpt35-1106"
     | "openai-gpt4"
     | "openai-gpt4-0613"
+    | "openai-gpt4-1106"
     | "anthropic-claude-v2"
     | "anthropic-claude-instant-v1"
     | "meta-llama2-70b"
@@ -46,12 +48,6 @@ export interface PromptCompletionInput {
   temperature?: number;
   validators?: (
     | {
-        _oneof_type_?: "regex";
-        pattern: string;
-        flags?: string;
-        [k: string]: any | undefined;
-      }
-    | {
         _oneof_type_?: "is_json";
         [k: string]: any | undefined;
       }
@@ -63,6 +59,12 @@ export interface PromptCompletionInput {
         schema?: {
           [k: string]: any | undefined;
         };
+        [k: string]: any | undefined;
+      }
+    | {
+        _oneof_type_?: "regex";
+        pattern: string;
+        flags?: string;
         [k: string]: any | undefined;
       }
   )[];
@@ -80,8 +82,10 @@ export interface PromptCompletionInput {
             | "openai-gpt35"
             | "openai-gpt35-16k"
             | "openai-gpt35-0613"
+            | "openai-gpt35-1106"
             | "openai-gpt4"
             | "openai-gpt4-0613"
+            | "openai-gpt4-1106"
             | "anthropic-claude-v2"
             | "anthropic-claude-instant-v1"
             | "meta-llama2-70b"
@@ -112,11 +116,27 @@ export interface PromptCompletionInput {
     /**
      * JSONSchema for the params of the function
      */
-    parameters?: {
+    parameters: {
       [k: string]: any | undefined;
     };
   }[];
+  /**
+   * Timeout in milliseconds, request will timeout after this much time if it runs for too long.
+   */
+  timeout_ms?: number;
   debug?: boolean;
+  mock_llm_response?: {
+    status?: number;
+    body?: any;
+    headers?: {
+      [k: string]: string | undefined;
+    };
+    [k: string]: any | undefined;
+  };
+  /**
+   * Streams the output as it is generated. Only implemented when running an agent.
+   */
+  stream?: boolean;
 }
 
 export interface PromptCompletionOutput {
@@ -152,8 +172,10 @@ export interface PromptCompletionOutput {
               | "openai-gpt35"
               | "openai-gpt35-16k"
               | "openai-gpt35-0613"
+              | "openai-gpt35-1106"
               | "openai-gpt4"
               | "openai-gpt4-0613"
+              | "openai-gpt4-1106"
               | "anthropic-claude-v2"
               | "anthropic-claude-instant-v1"
               | "meta-llama2-70b"
@@ -195,8 +217,8 @@ export interface PromptCompletionOutput {
 }
 
 export interface ApiCallInput {
-  url: string;
   method: "GET" | "POST" | "PUT" | "HEAD" | "PATCH" | "DELETE" | "OPTIONS";
+  url: string;
   headers?: {
     [k: string]: any | undefined;
   };
@@ -205,6 +227,9 @@ export interface ApiCallInput {
     | {
         [k: string]: any | undefined;
       };
+  url_params?: {
+    [k: string]: any | undefined;
+  };
   response_type?: "string" | "json" | "arrayBuffer" | "blob";
 }
 
@@ -265,6 +290,9 @@ export interface SearchOutput {
         [k: string]: any | undefined;
       }
   )[];
+  documents?: {
+    [k: string]: any | undefined;
+  };
   [k: string]: any | undefined;
 }
 
@@ -282,7 +310,9 @@ export interface SearchArrayOutput {
 
 export interface BulkUpdateInput {
   dataset_id: string;
-  documents: any[];
+  documents: {
+    [k: string]: any | undefined;
+  }[];
   clean_field_names?: boolean;
   ingest_in_background?: boolean;
 }
@@ -352,47 +382,6 @@ export interface SendEmailStepOutput {
   [k: string]: any | undefined;
 }
 
-export interface RedisSearchInput {
-  index: string;
-  query: string;
-  vector_field: string;
-  /**
-   * The model name to use.
-   */
-  model:
-    | "image_text"
-    | "text_image"
-    | "all-mpnet-base-v2"
-    | "clip-vit-b-32-image"
-    | "clip-vit-b-32-text"
-    | "clip-vit-l-14-image"
-    | "clip-vit-l-14-text"
-    | "sentence-transformers"
-    | "text-embedding-ada-002"
-    | "cohere-small"
-    | "cohere-large"
-    | "cohere-multilingual-22-12";
-  page_size?: number;
-}
-
-export interface RedisSearchOutput {
-  results: any[];
-  [k: string]: any | undefined;
-}
-
-export interface RedisInsertInput {
-  key: string;
-  document: {
-    [k: string]: any | undefined;
-  };
-  wait?: boolean;
-}
-
-export interface RedisInsertOutput {
-  inserted: number;
-  [k: string]: any | undefined;
-}
-
 export interface JoinArrayInput {
   array: string[];
   sep: string;
@@ -446,6 +435,133 @@ export interface AudioToTextV2Output {
   };
 }
 
+export interface AudioToTextV3Input {
+  audio_url: string;
+}
+
+export type Words = {
+  text: string;
+  start: number;
+  end: number;
+  confidence: number;
+  speaker: string;
+  [k: string]: any | undefined;
+}[];
+
+export interface AudioToTextV3Output {
+  /**
+   * The unique identifier for the transcription.
+   */
+  id: string;
+  /**
+   * The language model used for transcription.
+   */
+  language_model: string;
+  /**
+   * The acoustic model used for transcription.
+   */
+  acoustic_model: string;
+  /**
+   * The language code representing the language of the transcription.
+   */
+  language_code: string;
+  /**
+   * The status of the transcription.
+   */
+  status: string;
+  /**
+   * The URL of the audio file being transcribed.
+   */
+  audio_url: string;
+  /**
+   * The full transcription text.
+   */
+  text: string;
+  words: Words;
+  utterances: {
+    confidence: number;
+    end: number;
+    speaker: string;
+    start: number;
+    text: string;
+    words: Words;
+    [k: string]: any | undefined;
+  }[];
+  confidence: number;
+  audio_duration: number;
+  punctuate: boolean;
+  format_text: boolean;
+  dual_channel: boolean;
+  webhook_url?: string | null;
+  webhook_status_code?: number | null;
+  webhook_auth: boolean;
+  webhook_auth_header_name?: string | null;
+  speed_boost: boolean;
+  auto_highlights_result?: {
+    [k: string]: any | undefined;
+  } | null;
+  auto_highlights: boolean;
+  audio_start_from?: number | null;
+  audio_end_at?: number | null;
+  word_boost?: string[];
+  boost_param?: string | null;
+  filter_profanity: boolean;
+  redact_pii: boolean;
+  redact_pii_audio: boolean;
+  redact_pii_audio_quality?: string | null;
+  redact_pii_policies?: {
+    [k: string]: any | undefined;
+  } | null;
+  redact_pii_sub?: {
+    [k: string]: any | undefined;
+  } | null;
+  speaker_labels: boolean;
+  content_safety: boolean;
+  iab_categories: boolean;
+  content_safety_labels: {
+    status?: string;
+    results?: any[];
+    summary?: {
+      [k: string]: any | undefined;
+    };
+    [k: string]: any | undefined;
+  };
+  iab_categories_result: {
+    status?: string;
+    results?: any[];
+    summary?: {
+      [k: string]: any | undefined;
+    };
+    [k: string]: any | undefined;
+  };
+  language_detection: boolean;
+  custom_spelling?: {
+    [k: string]: any | undefined;
+  } | null;
+  throttled?: boolean | null;
+  auto_chapters?: boolean;
+  summarization?: boolean;
+  summary_type?: string | null;
+  summary_model?: string | null;
+  custom_topics: boolean;
+  topics: string[];
+  speech_threshold?: number | null;
+  disfluencies: boolean;
+  sentiment_analysis: boolean;
+  chapters?: {
+    [k: string]: any | undefined;
+  } | null;
+  sentiment_analysis_results?: {
+    [k: string]: any | undefined;
+  } | null;
+  entity_detection: boolean;
+  entities?: {
+    [k: string]: any | undefined;
+  } | null;
+  summary?: string | null;
+  speakers_expected?: number | null;
+}
+
 export interface AnonymizeTextInput {
   input: string;
 }
@@ -489,6 +605,15 @@ export interface RelevanceApiCallOutput {
   status: number;
 }
 
+export interface GetLinkedinProfileInput {
+  url: string;
+  method: "Get User Posts" | "Get User Profile" | "Get Company Profile";
+}
+
+export interface GetLinkedinProfileOutput {
+  data: any;
+}
+
 export interface SummarizeKnowledgeInput {
   knowledge: string;
   optimization?:
@@ -499,8 +624,10 @@ export interface SummarizeKnowledgeInput {
           | "openai-gpt35"
           | "openai-gpt35-16k"
           | "openai-gpt35-0613"
+          | "openai-gpt35-1106"
           | "openai-gpt4"
           | "openai-gpt4-0613"
+          | "openai-gpt4-1106"
           | "anthropic-claude-v2"
           | "anthropic-claude-instant-v1"
           | "meta-llama2-70b"
@@ -541,8 +668,10 @@ export interface SummarizeKnowledgeOutput {
           | "openai-gpt35"
           | "openai-gpt35-16k"
           | "openai-gpt35-0613"
+          | "openai-gpt35-1106"
           | "openai-gpt4"
           | "openai-gpt4-0613"
+          | "openai-gpt4-1106"
           | "anthropic-claude-v2"
           | "anthropic-claude-instant-v1"
           | "meta-llama2-70b"
@@ -622,9 +751,278 @@ export interface RunTransformationOutput {
 export interface RunChainInput {
   studio_id: string;
   project?: string;
+  region?: string;
   version?: string;
-  params: {
+  params?: {
     [k: string]: any | undefined;
+  };
+  studio_override?: {
+    version?: string;
+    project?: string;
+    _id?: string;
+    studio_id: string;
+    public?: boolean;
+    insert_date_?: string;
+    transformations?: {
+      steps: {
+        name: string;
+        transformation: string;
+        params: {
+          [k: string]: any | undefined;
+        };
+        saved_params?: {
+          [k: string]: any | undefined;
+        };
+        output?: {
+          [k: string]: any | undefined;
+        };
+        foreach?: string | any[];
+        if?: string | boolean | null;
+        display_name?: string;
+      }[];
+      output?: {
+        [k: string]: string | undefined;
+      } | null;
+    };
+    /**
+     * Templates support simple expressions on 'if' and 'params' fields. Supply an expression in the format:
+     *
+     * ${{params.my_param + params.my_param2 <= 5 }}
+     *
+     * Operators supported: ["!=","==","+","-","&&","||","false","true"]
+     * Ensure that there is a space between each expression item or it will not evaluate correctly.
+     */
+    template?: {
+      transformations: {
+        [k: string]:
+          | {
+              properties: {
+                params: {
+                  [k: string]: any | undefined;
+                };
+                workflow_id: string;
+                host_type?: "batch" | "lambda" | "instant-workflows" | "none";
+                dataset_id?: string;
+                version?: string;
+              };
+              depends_on?: string[];
+              /**
+               * This should evaluate to a number. For example, it would be ${{ params.cluster_job_count }} or ${{ params.cluster_sizes.length }}. it will run a duplicate version of the workflow with a variable ${{ repeat_index }} that marks what index it belongs to.
+               */
+              repeat?: string;
+              repeat_index?: number;
+              if?: string;
+              /**
+               * If this step outputs to status, its output will be accessible at output[output_key] in the parent job's status.
+               */
+              output_key?: string;
+              /**
+               * whether the email config of the step should be applied to the parent
+               */
+              passthrough_email?: boolean;
+            }
+          | undefined;
+      };
+    };
+    update_date_?: string;
+    tags?: {
+      type?: "transformation";
+      categories?: {
+        [k: string]: true | undefined;
+      };
+      [k: string]: any | undefined;
+    };
+    publicly_triggerable?: boolean;
+    machine_user_id?: string;
+    creator_user_id?: string;
+    creator_first_name?: string;
+    creator_last_name?: string;
+    creator_display_picture?: string;
+    cover_image?: string;
+    emoji?: string;
+    /**
+     * A jsonschema superset object that users parameters will be validated against upon execution.
+     */
+    params_schema?: {
+      metadata?: {
+        field_order?: string[];
+        [k: string]: any | undefined;
+      };
+      properties?: {
+        [k: string]:
+          | {
+              metadata?: {
+                content_type?:
+                  | "json"
+                  | "json_list"
+                  | "long_text"
+                  | "short_text"
+                  | "file_url"
+                  | "llm_prompt"
+                  | "speech"
+                  | "code"
+                  | "dataset_id"
+                  | "knowledge_set"
+                  | "markdown"
+                  | "chain_id"
+                  | "chain_params"
+                  | "file_to_text"
+                  | "file_to_text_llm_friendly"
+                  | "memory_optimizer"
+                  | "memory"
+                  | "table"
+                  | "agent_id"
+                  | "api_key"
+                  | "key_value_input"
+                  | "knowledge_editor";
+                variable_search_field?: string;
+                accepted_file_types?: string[];
+                hidden?: boolean;
+                advanced?: boolean;
+                placeholder?: any;
+                title?: string;
+                description?: string;
+                icon_url?: string;
+                require_toggle?: boolean;
+                dont_substitute?: boolean;
+                min?: number;
+                max?: number;
+                value_suggestion_chain?: {
+                  url: string;
+                  project_id: string;
+                  output_key?: string;
+                  [k: string]: any | undefined;
+                };
+                enum?: {
+                  description: string;
+                  value: string;
+                }[];
+                bulk_run_input_source?: "" | "$DOCUMENT" | "$FIELD_PARAM_MAPPING";
+                headers?: string[];
+                rows?: number;
+                can_add_or_remove_columns?: boolean;
+                placeholders?: {
+                  /**
+                   * This interface was referenced by `undefined`'s JSON-Schema definition
+                   * via the `patternProperty` ".*".
+                   */
+                  [k: string]: string;
+                };
+                language?: "python" | "javascript";
+                /**
+                 * Props to pass to the KeyValueInput component.
+                 */
+                key_value_input_opts?: {
+                  /**
+                   * Set headers to display above the key and/or value columns.
+                   */
+                  header?: {
+                    /**
+                     * Whether to hide all headers.
+                     */
+                    hide?: boolean;
+                    /**
+                     * The header displayed above the key column.
+                     */
+                    key?: string;
+                    /**
+                     * The header displayed above the value column.
+                     */
+                    value?: string;
+                    [k: string]: any | undefined;
+                  };
+                  /**
+                   * Set placeholder values to display in the key and/or value columns.
+                   */
+                  placeholder?: {
+                    /**
+                     * Whether to hide all placeholders.
+                     */
+                    hide?: boolean;
+                    /**
+                     * The placeholder to display in each cell of the key column.
+                     */
+                    key?: string;
+                    /**
+                     * The placeholder to display in each cell of the value column.
+                     */
+                    value?: string;
+                    [k: string]: any | undefined;
+                  };
+                  /**
+                   * The text displayed in the 'Add' button that inserts a new pair.
+                   */
+                  addButtonText?: string;
+                  [k: string]: any | undefined;
+                };
+                /**
+                 * [KnowledgeEditor] The name of the field in the transformation's param schema containing the knowledge set ID.
+                 */
+                knowledge_set_field_name?: string;
+              };
+              [k: string]: any | undefined;
+            }
+          | undefined;
+      };
+      [k: string]: any | undefined;
+    };
+    /**
+     * A jsonschema superset object to provide metadata for tool output fields.
+     */
+    output_schema?: {
+      properties?: {
+        [k: string]:
+          | {
+              metadata?: {
+                content_type?: "html" | "chart.js";
+              };
+              [k: string]: any | undefined;
+            }
+          | undefined;
+      };
+      [k: string]: any | undefined;
+    };
+    schedule?: {
+      frequency?: "hourly" | "daily";
+      [k: string]: any | undefined;
+    };
+    /**
+     * Override the starting state of the studio
+     */
+    state?: {
+      params?: {
+        [k: string]: any | undefined;
+      };
+      steps?: {
+        [k: string]:
+          | {
+              output?: {
+                [k: string]: any | undefined;
+              };
+              executionTime?: number;
+              /**
+               * Only used if the corresponding step has a `foreach` configured
+               */
+              results?: any[];
+              /**
+               * Will be true if the step was skipped, and not run
+               */
+              skipped?: boolean;
+              skippedItems?: any[];
+              [k: string]: any | undefined;
+            }
+          | undefined;
+      };
+      [k: string]: any | undefined;
+    };
+    title?: string;
+    description?: string;
+    /**
+     * Mapping from alias -> real variable path
+     */
+    state_mapping?: {
+      [k: string]: string | undefined;
+    };
   };
 }
 
@@ -651,6 +1049,7 @@ export interface RunChainOutput {
     multiplier?: number;
   }[];
   executionTime: number;
+  [k: string]: any | undefined;
 }
 
 export interface TriggerWorkflowInput {
@@ -693,6 +1092,7 @@ export interface CombineArrayOutput {
 export interface PythonCodeTransformationInput {
   packages?: string[];
   run_commands?: string[];
+  raise_error?: boolean;
   code: string;
   [k: string]: any | undefined;
 }
@@ -840,22 +1240,6 @@ export interface TruncateTextOutput {
   [k: string]: any | undefined;
 }
 
-export interface ConnectPlaystoreInput {
-  playstore_id: string;
-  sample_size?: number;
-  country: string;
-}
-
-export interface ConnectPlaystoreOutput {
-  output: {
-    reviewId?: string;
-    userName?: string;
-    userImage?: string;
-    content?: string;
-    [k: string]: any | undefined;
-  }[];
-}
-
 export interface BrowserlessScrapeInput {
   website_url: string;
   method?: "Text" | "HTML";
@@ -912,6 +1296,10 @@ export interface GetDatasetFieldOutput {
 }
 
 export interface FileToTextLlmFriendlyInput {
+  /**
+   * Set to false to not transform text into an llm friendly format.
+   */
+  llm_friendly_format?: boolean;
   file_url: string;
 }
 
@@ -955,6 +1343,26 @@ export interface FuzzySearchOutput {
   end: number;
 }
 
+export interface MessageAgentInput {
+  agent_id: string;
+  message: {
+    [k: string]: any | undefined;
+  };
+  conversation_id?: string;
+  wait_for_reply?: boolean;
+}
+
+export interface MessageAgentOutput {
+  job_info: {
+    studio_id: string;
+    job_id: string;
+  };
+  conversation_id: string;
+  message?: {
+    [k: string]: any | undefined;
+  };
+}
+
 export type BuiltinTransformations = {
   prompt_completion: { input: PromptCompletionInput, output: PromptCompletionOutput }
   api_call: { input: ApiCallInput, output: ApiCallOutput }
@@ -964,16 +1372,16 @@ export type BuiltinTransformations = {
   bulk_update: { input: BulkUpdateInput, output: BulkUpdateOutput }
   generate_vector_embedding: { input: GenerateVectorEmbeddingInput, output: GenerateVectorEmbeddingOutput }
   send_email_step: { input: SendEmailStepInput, output: SendEmailStepOutput }
-  redis_search: { input: RedisSearchInput, output: RedisSearchOutput }
-  redis_insert: { input: RedisInsertInput, output: RedisInsertOutput }
   join_array: { input: JoinArrayInput, output: JoinArrayOutput }
   pdf_to_text: { input: PdfToTextInput, output: PdfToTextOutput }
   audio_to_text: { input: AudioToTextInput, output: AudioToTextOutput }
   audio_to_text_v2: { input: AudioToTextV2Input, output: AudioToTextV2Output }
+  audio_to_text_v3: { input: AudioToTextV3Input, output: AudioToTextV3Output }
   anonymize_text: { input: AnonymizeTextInput, output: AnonymizeTextOutput }
   nemo_guardrails: { input: NemoGuardrailsInput, output: NemoGuardrailsOutput }
   markdown: { input: MarkdownInput, output: MarkdownOutput }
   relevance_api_call: { input: RelevanceApiCallInput, output: RelevanceApiCallOutput }
+  get_linkedin_profile: { input: GetLinkedinProfileInput, output: GetLinkedinProfileOutput }
   summarize_knowledge: { input: SummarizeKnowledgeInput, output: SummarizeKnowledgeOutput }
   to_json: { input: ToJsonInput, output: ToJsonOutput }
   export_to_file: { input: ExportToFileInput, output: ExportToFileOutput }
@@ -992,7 +1400,6 @@ export type BuiltinTransformations = {
   text_to_speech: { input: TextToSpeechInput, output: TextToSpeechOutput }
   stable_diffusion_xl: { input: StableDiffusionXlInput, output: StableDiffusionXlOutput }
   truncate_text: { input: TruncateTextInput, output: TruncateTextOutput }
-  connect_playstore: { input: ConnectPlaystoreInput, output: ConnectPlaystoreOutput }
   browserless_scrape: { input: BrowserlessScrapeInput, output: BrowserlessScrapeOutput }
   translate: { input: TranslateInput, output: TranslateOutput }
   excel_to_text: { input: ExcelToTextInput, output: ExcelToTextOutput }
@@ -1002,4 +1409,5 @@ export type BuiltinTransformations = {
   echo: { input: EchoInput, output: EchoOutput }
   spreadsheet_to_json: { input: SpreadsheetToJsonInput, output: SpreadsheetToJsonOutput }
   fuzzy_search: { input: FuzzySearchInput, output: FuzzySearchOutput }
+  message_agent: { input: MessageAgentInput, output: MessageAgentOutput }
 }
