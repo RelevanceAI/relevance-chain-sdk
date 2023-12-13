@@ -1,6 +1,6 @@
 {
   "name": "@relevanceai/chain",
-  "version": "0.1.10",
+  "version": "0.1.12",
   "private": false,
   "description": "The managed, developer-first SDK for building LLM chains.",
   "main": "dist/index.js",
